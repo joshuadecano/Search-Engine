@@ -12,10 +12,12 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     tdi = InvertedIndex(vocabulary, len(corpus))
     for c in corpus:
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
-        for n in tokensz:
+        dex = 0             # new for proj
+        for n in tokensz:  
             itt = token_processor.process_token(n)
             vocabulary.add(itt)
-            tdi.add_term(itt, c.id)
+            tdi.add_term(itt, c.id, dex)
+            dex += 1        # increments by 1 for every token passed in to add_term
     return tdi
 
 if __name__ == "__main__":

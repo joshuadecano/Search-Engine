@@ -10,7 +10,7 @@ class InvertedIndex(Index):
     def __init__(self, vocab : Iterable[str], corpus_size : int):
         """Constructs an empty index using the given vocabulary and corpus size."""
         self.hasheroni = {}
-        self.posting_list = []
+        #self.posting_list = []
         self.vocabulary = list(vocab)
         self.vocabulary.sort()
         self.corpus_size = corpus_size
