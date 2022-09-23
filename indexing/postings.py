@@ -4,4 +4,4 @@ class Posting:
         self.doc_id = doc_id
         self.position = []
     def add_position(self, position : int):
-        self.position.apped(position)
+        return self.position.append(position)

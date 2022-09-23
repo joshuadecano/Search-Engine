@@ -33,4 +33,4 @@ if __name__ == "__main__":
     while query != "quit":
         query = input("Enter a word: ")
         for p in index.get_postings(query):
-            print(f"Document ID {p.doc_id}")
+            print(f"Document ID {p.doc_id} {p.position}")
