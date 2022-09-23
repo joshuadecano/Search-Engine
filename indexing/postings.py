@@ -3,5 +3,5 @@ class Posting:
     def __init__(self, doc_id : int):
         self.doc_id = doc_id
         self.position = []
-    def add_position(self, term : str, doc_id : int):
-        
+    def add_position(self, position : int):
+        self.position.apped(position)

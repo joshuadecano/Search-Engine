@@ -1,6 +1,6 @@
 from pathlib import Path
 from documents import DocumentCorpus, DirectoryCorpus
-from indexing import Index, InvertedIndex
+from indexing import Index, PositionalInvertedIndex
 from text import BasicTokenProcessor, englishtokenstream
 
 """This basic program builds a term-document matrix over the .txt files in 
@@ -9,7 +9,7 @@ the same directory as this file."""
 def index_corpus(corpus : DocumentCorpus) -> Index:
     token_processor = BasicTokenProcessor()
     vocabulary = set()
-    tdi = InvertedIndex(vocabulary, len(corpus))
+    tdi = PositionalInvertedIndex(vocabulary, len(corpus))
     for c in corpus:
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         dex = 0             # new for proj
