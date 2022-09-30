@@ -22,10 +22,12 @@ class PositionalInvertedIndex(Index):
         post = Posting(doc_id)
         if term in self.hasheroni:                  #if the term is in the hash map keys
             if post.doc_id == self.hasheroni[term][-1].doc_id:            #if the document id is not the most recent item in the hash map values
-                return None         #add the document id to the list of postings
+                self.hasheroni[term][-1].add_position(position)         #add the document id to the list of postings
             else:
+                post.add_position(position)
                 self.hasheroni[term].append(post) #add doc to list 
         else:
+            post.add_position(position)
             self.hasheroni[term] = [post]
 
         
