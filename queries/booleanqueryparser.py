@@ -1,4 +1,4 @@
-from . import AndQuery, OrQuery, QueryComponent, TermLiteral
+from . import AndQuery, OrQuery, QueryComponent, TermLiteral, PhraseLiteral
 
 class BooleanQueryParser:
     class _StringBounds:
@@ -59,7 +59,19 @@ class BooleanQueryParser:
         # Skip past white space.
         while subquery[start_index] == ' ':
             start_index += 1
-
+        
+        if subquery[start_index] == '"':        #if a double quote is found (indicating the beginning of a phrase literal)
+            start_index += 1                    #start index moves to the actual text values
+            next_space = subquery.find('"', start_index)    #finds the next double quote (indicating the end of the phrase literal) and sets it as the end of the literal.
+            if next_space < 0:
+            # No more literals in this subquery.
+                length_out = sub_length - start_index
+            else:
+                length_out = next_space - start_index
+            return BooleanQueryParser._Literal(
+                BooleanQueryParser._StringBounds(start_index, length_out),
+                PhraseLiteral(subquery[start_index:start_index + length_out])
+            )
         # Locate the next space to find the end of this literal.
         next_space = subquery.find(' ', start_index)
         if next_space < 0:
