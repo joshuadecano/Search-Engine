@@ -27,6 +27,6 @@ class JsonFileDocument(Document):
             return nealdt
 
     @staticmethod
-    def load_from(abs_path : Path, doc_id : int) -> 'TextFileDocument' :
+    def load_from(abs_path : Path, doc_id : int) -> 'JsonFileDocument' :
         """A factory method to create a TextFileDocument around the given file path."""
         return JsonFileDocument(doc_id, abs_path)
