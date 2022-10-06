@@ -15,10 +15,10 @@ class AndQuery(QueryComponent):
         result = self.components[0]
         while count < num:
             #for s in self.components:
-            result.append(self.intersect(index, result, self.components[count+1]))
+            result.append(self.intersect(result, self.components[count+1]))
             count += 1
         return result
-    def intersect(self, index, p1 : QueryComponent, p2 : QueryComponent):
+    def intersect(self, p1 : QueryComponent, p2 : QueryComponent):
         answer = []
         inc1 = 0
         inc2 = 0
