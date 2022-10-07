@@ -31,20 +31,27 @@ if __name__ == "__main__":
     # for now, we'll only support single-term queries.
     #query = "whale" # hard-coded search for "whale"\
     #print(index.get_postings("whale"))
+
     query = ""
     while query != ":q":
         query = input("Enter a query: ")
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
-            token_processorss = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
+            token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
             token = ' '.join(query.split()[1:])
             print(stemmer.stem(token))
-            tokens = token_processorss.process_token(token)
+            tokens = token_processor.process_token(token)
             print(tokens)
             continue
         if query.startswith(':index'):
             token_processor = protokenprocessor.ProTokenProcessor()
             token = ' '.join(query.split()[1:])
+            continue
+        if query.startswith(':vocab'):
+            testss = sorted(index.vocabulary())
+            for i in range(1000):
+                print(testss[i])
+            print(f"Total number of vocabulary terms: {len(testss)}")
             continue
         for p in index.get_postings(query):
             print(f"Document ID {p.doc_id} {p.position}")

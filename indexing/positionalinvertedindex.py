@@ -11,8 +11,8 @@ class PositionalInvertedIndex(Index):
         """Constructs an empty index using the given vocabulary and corpus size."""
         self.hasheroni = {}
         #self.posting_list = []
-        self.vocabulary = list(vocab)
-        self.vocabulary.sort()
+        self.vocabular = vocab
+        #self.vocabular.sort()
         self.corpus_size = corpus_size
 
     def add_term(self, term : str, doc_id : int, position : int):   #pass in the integer position of the term within the document in addition to the doc id and string
@@ -37,4 +37,4 @@ class PositionalInvertedIndex(Index):
             return self.hasheroni[term]
     
     def vocabulary(self) -> Iterable[str]:
-        return self.vocabulary
+        return self.vocabular
