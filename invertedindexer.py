@@ -2,6 +2,7 @@ from pathlib import Path
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from text import protokenprocessor, englishtokenstream
+from porter2stemmer import Porter2Stemmer
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
@@ -31,7 +32,13 @@ if __name__ == "__main__":
     #query = "whale" # hard-coded search for "whale"\
     #print(index.get_postings("whale"))
     query = ""
-    while query != "quit":
-        query = input("Enter a word: ")
+    while query != ":q":
+        query = input("Enter a query: ")
+        if query.startswith(':stem'):
+            stemmer = Porter2Stemmer()
+            token_processor = protokenprocessor.ProTokenProcessor()
+            token = ' '.join(query.split()[1:])
+            print(stemmer.stem(token))
+            continue
         for p in index.get_postings(query):
             print(f"Document ID {p.doc_id} {p.position}")
