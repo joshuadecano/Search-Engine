@@ -1,13 +1,13 @@
 from pathlib import Path
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
-from text import BasicTokenProcessor, englishtokenstream
+from text import protokenprocessor, englishtokenstream
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
-    token_processor = BasicTokenProcessor()
+    token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = set()
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
     for c in corpus:
@@ -15,9 +15,10 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         dex = 0             # new for proj
         for n in tokensz:  
             itt = token_processor.process_token(n)
-            vocabulary.add(itt)
-            tdi.add_term(itt, c.id, dex)
-            dex += 1        # increments by 1 for every token passed in to add_term
+            for s in itt:
+                vocabulary.add(s)
+                tdi.add_term(s, c.id, dex)
+                dex += 1        # increments by 1 for every token passed in to add_term
     return tdi
 
 if __name__ == "__main__":
