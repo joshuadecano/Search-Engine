@@ -24,7 +24,8 @@ class AndQuery(QueryComponent):
         inc2 = 0
         #while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
         while p1 and p2:
-            if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
+            if p1.get_postings
+            #if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
                 answer.append(p1.get_postings.doc_id)
             elif p1.get_postings[inc1].doc_id < p2.get_postings[inc2].doc_id:
                 inc1 += 1
