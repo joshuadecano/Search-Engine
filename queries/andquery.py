@@ -30,8 +30,6 @@ class AndQuery(QueryComponent):
             else:
                 inc2 += 1
         return answer
-
-        #return index.get_postings(self.term)
         # TODO: program the merge for an AndQuery, by gathering the postings of the composed QueryComponents and
 		# intersecting the resulting postings.
         #return result
