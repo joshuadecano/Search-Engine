@@ -3,6 +3,7 @@ from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
+from queries import BooleanQueryParser, booleanqueryparser
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
@@ -31,8 +32,8 @@ if __name__ == "__main__":
     # for now, we'll only support single-term queries.
     #query = "whale" # hard-coded search for "whale"\
     #print(index.get_postings("whale"))
-
     query = ""
+    bqparser = booleanqueryparser.BooleanQueryParser()
     while query != ":q":
         query = input("Enter a query: ")
         if query.startswith(':stem'):
@@ -40,8 +41,8 @@ if __name__ == "__main__":
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
             token = ' '.join(query.split()[1:])
             print(stemmer.stem(token))
-            tokens = token_processor.process_token(token)
-            print(tokens)
+            #tokens = token_processor.process_token(token)
+            #print(tokens)
             continue
         if query.startswith(':index'):
             token_processor = protokenprocessor.ProTokenProcessor()
@@ -53,5 +54,5 @@ if __name__ == "__main__":
                 print(testss[i])
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
-        for p in index.get_postings(query):
+        for p in bqparser.parse_query(query).get_postings(index):
             print(f"Document ID {p.doc_id} {p.position}")

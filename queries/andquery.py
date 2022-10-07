@@ -9,10 +9,10 @@ class AndQuery(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         result = []
-        result = self.components[0]
+        result.append(self.components[0])
         count = 0
-        num = range(self.components)     # number of terms in AND query
-        result = self.components[0]
+        num = len(self.components)     # number of terms in AND query
+        #result = self.components[0]
         while count < num:
             #for s in self.components:
             result.append(self.intersect(result, self.components[count+1]))
@@ -22,7 +22,8 @@ class AndQuery(QueryComponent):
         answer = []
         inc1 = 0
         inc2 = 0
-        while inc1 < range(p1) and inc2 < range(p2):
+        #while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
+        while p1 and p2:
             if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
                 answer.append(p1.get_postings.doc_id)
             elif p1.get_postings[inc1].doc_id < p2.get_postings[inc2].doc_id:

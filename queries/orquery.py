@@ -9,10 +9,9 @@ class OrQuery(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         result = []
-        result = self.components[0]
+        result.append(self.components[0])
         count = 0
-        num = range(self.components)     # number of terms in AND query
-        result = self.components[0]
+        num = len(self.components)     # number of terms in AND query
         while count < num:
             #for s in self.components:
             result.append(self.intersect(result, self.components[count+1]))
@@ -23,7 +22,7 @@ class OrQuery(QueryComponent):
         answer = []
         inc1 = 0
         inc2 = 0
-        while inc1 < range(p1) and inc2 < range(p2):
+        while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
             if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
                 if answer[-1] == p1.get_postings[inc1].doc_id:
                     continue # ? 
