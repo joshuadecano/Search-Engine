@@ -36,9 +36,15 @@ if __name__ == "__main__":
         query = input("Enter a query: ")
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
-            token_processor = protokenprocessor.ProTokenProcessor()
+            token_processorss = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
             token = ' '.join(query.split()[1:])
             print(stemmer.stem(token))
+            tokens = token_processorss.process_token(token)
+            print(tokens)
+            continue
+        if query.startswith(':index'):
+            token_processor = protokenprocessor.ProTokenProcessor()
+            token = ' '.join(query.split()[1:])
             continue
         for p in index.get_postings(query):
             print(f"Document ID {p.doc_id} {p.position}")

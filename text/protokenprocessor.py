@@ -19,14 +19,14 @@ class ProTokenProcessor(TokenProcessor):
                 temp = temp[:-1]
             re.sub("'","", temp)    # removes apostrophes
             re.sub('"',"",temp)     # removes quotation marks
-            stemmer.stem(temp)
-            if '-' in temp:
+            stemd = stemmer.stem(temp)
+            if '-' in stemd:
                 for t in temp.split("-"):
                     tok = t.strip()
                     if len(tok) > 0:
                         final_return.append(tok)
             else:
-                final_return.append(temp)
+                final_return.append(stemd)
         except:
             print("Exception: Index out of range")
         return final_return
