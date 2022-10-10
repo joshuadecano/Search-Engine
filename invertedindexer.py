@@ -36,6 +36,9 @@ if __name__ == "__main__":
     bqparser = booleanqueryparser.BooleanQueryParser()
     while query != ":q":
         query = input("Enter a query: ")
+        stemmer = Porter2Stemmer()
+        token_processor = protokenprocessor.ProTokenProcessor()  
+        fin_query = (stemmer.stem(query))
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
@@ -54,5 +57,9 @@ if __name__ == "__main__":
                 print(testss[i])
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
-        for p in bqparser.parse_query(query).get_postings(index):
-            print(f"Document ID {p.doc_id} {p.position}")
+        for p in bqparser.parse_query(fin_query).get_postings(index):
+            print(p)
+            #docs = p.
+            #print(f"Document ID {p.doc_id} {p.position}")
+            # getting an error saying termliteral does not have doc_id.
+            # i might have to just run through the whole list of postings and return the doc_ids

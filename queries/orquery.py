@@ -1,7 +1,7 @@
 from .querycomponent import QueryComponent
 from indexing import Index, Posting
 
-from queries import querycomponent 
+from queries import QueryComponent 
 
 class OrQuery(QueryComponent):
     def __init__(self, components : list[QueryComponent]):
@@ -22,14 +22,18 @@ class OrQuery(QueryComponent):
         answer = []
         inc1 = 0
         inc2 = 0
-        post1 = p1.get_postings(Index)      # returns a list of postings
-        post2 = p2.get_postings(Index)      # returns a list of postings
+        post1 = p1.get_postings(index)      # returns a list of postings
+        post2 = p2.get_postings(index)      # returns a list of postings
+        # Recently this showed up as out of range, not sure if this fixed it
+        # before it was while p1 and p2:
         while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
             if post1[inc1].doc_id == post2[inc2].doc_id:
                 if answer[-1] == post1[inc1].doc_id:
                     continue # ? 
                 else:
                     answer.append(post1[inc1].doc_id)
+                    inc1 += 1
+                    inc2 += 1
             elif post1[inc1].doc_id < post2[inc2].doc_id:
                 answer.append(post1[inc1].doc_id)
                 inc1 += 1

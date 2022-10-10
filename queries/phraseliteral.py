@@ -1,5 +1,5 @@
-from asyncio.windows_events import NULL
-from os import terminal_size
+#from asyncio.windows_events import NULL
+#from os import terminal_size
 from indexing.postings import Posting
 from .querycomponent import QueryComponent
 
@@ -14,15 +14,13 @@ class PhraseLiteral(QueryComponent):
     def get_postings(self, index) -> list[Posting]:
         answer = []
         answer = self.terms[0]              # starting off with the first term
-        term_count = range(self.terms)
+        term_count = len(self.terms)
         comparisons = term_count - 2
         for s in range(comparisons):
             diff = s + 1
-            self.pos_match(index, answer, self.term[diff], diff)
+            self.pos_match(index, answer, self.terms[diff], diff)
 
         return answer
-
-        return 0
     def doc_match(self, index, term1 : str, term2 : str) -> list[int]:
         doc_list = []
         posting_list2 = []
