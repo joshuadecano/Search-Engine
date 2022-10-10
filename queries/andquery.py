@@ -18,16 +18,18 @@ class AndQuery(QueryComponent):
             result.append(self.intersect(result, self.components[count+1]))
             count += 1
         return result
-    def intersect(self, p1 : QueryComponent, p2 : QueryComponent):
+    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent):
         answer = []
+        post1 = p1.get_postings(Index)      # returns a list of postings
+        post2 = p2.get_postings(Index)      # returns a list of postings
         inc1 = 0
         inc2 = 0
         #while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
         while p1 and p2:
-            if p1.get_postings
+            if post1[inc1].doc_id == post2[inc2].doc_id:
             #if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
                 answer.append(p1.get_postings.doc_id)
-            elif p1.get_postings[inc1].doc_id < p2.get_postings[inc2].doc_id:
+            elif post1[inc1].doc_id < post2[inc2].doc_id:
                 inc1 += 1
             else:
                 inc2 += 1

@@ -18,21 +18,23 @@ class OrQuery(QueryComponent):
             count += 1
         return result
         
-    def union(self, p1 : QueryComponent, p2 : QueryComponent):
+    def union(self, index : Index, p1 : QueryComponent, p2 : QueryComponent):
         answer = []
         inc1 = 0
         inc2 = 0
+        post1 = p1.get_postings(Index)      # returns a list of postings
+        post2 = p2.get_postings(Index)      # returns a list of postings
         while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
-            if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
-                if answer[-1] == p1.get_postings[inc1].doc_id:
+            if post1[inc1].doc_id == post2[inc2].doc_id:
+                if answer[-1] == post1[inc1].doc_id:
                     continue # ? 
                 else:
-                    answer.append(p1.get_postings.doc_id)
-            elif p1.get_postings[inc1].doc_id < p2.get_postings[inc2].doc_id:
-                answer.append(p1.get_postings.doc_id)
+                    answer.append(post1[inc1].doc_id)
+            elif post1[inc1].doc_id < post2[inc2].doc_id:
+                answer.append(post1[inc1].doc_id)
                 inc1 += 1
             else:
-                answer.append(p2.get_postings.doc_id)
+                answer.append(post2[inc2].doc_id)
                 inc2 += 1
         return answer
 
