@@ -59,10 +59,11 @@ if __name__ == "__main__":
                 print(testss[i])
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
+        
         if book is not None:
             count = 1
             for p in book:
-                print("Document #", count, d.get_document(p.doc_id).title)
+                print("Document #", count, d.get_document(p.doc_id).title)      # current error: termliteral has no attribute "doc_ic"
                 count += 1
             print(len(book), "Documents found containing", query)
             answer = 1
