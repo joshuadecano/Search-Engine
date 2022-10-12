@@ -15,12 +15,13 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     for c in corpus:
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         dex = 0             # new for proj
-        for n in tokensz:  
-            itt = token_processor.process_token(n)
-            for s in itt:
-                vocabulary.add(s)
-                tdi.add_term(s, c.id, dex)
-                dex += 1        # increments by 1 for every token passed in to add_term
+        for n in tokensz:
+            if len(n) != 0:
+                itt = token_processor.process_token(n)
+                for s in itt:
+                    vocabulary.add(s)
+                    tdi.add_term(s, c.id, dex)
+                    dex += 1        # increments by 1 for every token passed in to add_term
     return tdi
 
 if __name__ == "__main__":
@@ -58,7 +59,7 @@ if __name__ == "__main__":
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
         for p in bqparser.parse_query(fin_query).get_postings(index):
-            print(p)
+            print(d.get_document(p.doc_id).title)
             #docs = p.
             #print(f"Document ID {p.doc_id} {p.position}")
             # getting an error saying termliteral does not have doc_id.

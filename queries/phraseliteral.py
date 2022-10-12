@@ -25,6 +25,7 @@ class PhraseLiteral(QueryComponent):
         doc_list = []
         posting_list2 = []
         posted = []
+        
         list1 = index.get_postings(term1)
         list2 = index.get_postings(term2)
         for s in list1:

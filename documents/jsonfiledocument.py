@@ -9,16 +9,14 @@ class JsonFileDocument(Document):
     """
     def __init__(self, id : int, path : Path):
         super().__init__(id)
-        
         self.path = path
 
     @property
     def title(self) -> str:
         with open(self.path, 'r', encoding="utf-8") as file:
             jtitle = json.load(file)
-            self.title = jtitle["title"]
-            return self.title
-
+            title = StringIO(jtitle["title"])
+            return title.getvalue()
     # returns TextIOWrapper
     def get_content(self) -> Iterable[str]:
         with open(self.path, 'r',encoding="utf-8") as file:
