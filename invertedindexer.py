@@ -3,12 +3,15 @@ from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
-from queries import BooleanQueryParser, booleanqueryparser
+from queries import booleanqueryparser
+from io import StringIO
+import re
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
+    whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = set()
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
@@ -16,7 +19,8 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         dex = 0             # new for proj
         for n in tokensz:
-            if len(n) != 0:
+            temp = re.sub(whitespace_re, "", n).lower()    
+            if len(temp) != 0:
                 itt = token_processor.process_token(n)
                 for s in itt:
                     vocabulary.add(s)
@@ -31,8 +35,6 @@ if __name__ == "__main__":
     index = index_corpus(d)
     # We aren't ready to use a full query parser;
     # for now, we'll only support single-term queries.
-    #query = "whale" # hard-coded search for "whale"\
-    #print(index.get_postings("whale"))
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
     while query != ":q":
@@ -40,13 +42,12 @@ if __name__ == "__main__":
         stemmer = Porter2Stemmer()
         token_processor = protokenprocessor.ProTokenProcessor()  
         fin_query = (stemmer.stem(query))
+        book = bqparser.parse_query(fin_query).get_postings(index)
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
             token = ' '.join(query.split()[1:])
             print(stemmer.stem(token))
-            #tokens = token_processor.process_token(token)
-            #print(tokens)
             continue
         if query.startswith(':index'):
             token_processor = protokenprocessor.ProTokenProcessor()
@@ -58,9 +59,24 @@ if __name__ == "__main__":
                 print(testss[i])
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
-        for p in bqparser.parse_query(fin_query).get_postings(index):
-            print(d.get_document(p.doc_id).title)
-            #docs = p.
-            #print(f"Document ID {p.doc_id} {p.position}")
-            # getting an error saying termliteral does not have doc_id.
-            # i might have to just run through the whole list of postings and return the doc_ids
+        if book is not None:
+            count = 1
+            for p in book:
+                print("Document #", count, d.get_document(p.doc_id).title)
+                count += 1
+            print(len(book), "Documents found containing", query)
+            answer = 1
+            while answer != 0:
+                try:
+                    answer = int(input("To view a document, enter the Document #, else enter '0'\n"))
+                    if answer == 0:
+                        continue
+                    if int(answer) <= len(book):
+                        print("Title:", d.get_document(book[answer-1].doc_id).title)
+                        print(d.get_document(book[answer-1].doc_id).get_content().getvalue())
+                    else:
+                        print("Invalid selection")
+                except:
+                    print("Invalid input")
+        else:
+            print("no results")
