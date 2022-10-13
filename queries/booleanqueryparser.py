@@ -62,7 +62,7 @@ class BooleanQueryParser:
         
         if subquery[start_index] == '"':        #if a double quote is found (indicating the beginning of a phrase literal)      "this term"
             start_index += 1                                                                                                    #t
-
+            
                 #start_index += 1                    #start index moves to the actual text values
             print(subquery)
             next_space = subquery.find(' ', start_index)    #finds the next double quote (indicating the end of the phrase literal) and sets it as the end of the literal.
