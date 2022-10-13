@@ -6,6 +6,7 @@ from porter2stemmer import Porter2Stemmer
 from queries import booleanqueryparser, querycomponent
 from io import StringIO
 import re
+import time
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
@@ -29,14 +30,18 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     return tdi
 
 if __name__ == "__main__":
+    start = time.time()
     corpus_path = Path()
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
     # Build the index over this directory.
     index = index_corpus(d)
+    stop = time.time()
+    print("Indexing took", stop-start, "seconds")
     # We aren't ready to use a full query parser;
     # for now, we'll only support single-term queries.
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
+
     while query != ":q":
         query = input("Enter a query: ")
         stemmer = Porter2Stemmer()
@@ -60,8 +65,6 @@ if __name__ == "__main__":
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
         if book is not None:
-            print(type(book))
-            #print(book.get_postings(index))
             big_book = book.get_postings(index)
             if big_book is None:
                 print("Term not found")
