@@ -12,13 +12,13 @@ class OrQuery(QueryComponent):
         result.append(self.components[0])
         count = 0
         num = len(self.components)     # number of terms in AND query
-        while count < num:
+        while count < num - 1:
             #for s in self.components:
-            result.append(self.intersect(result, self.components[count+1]))
+            result = self.union(index, result[count], self.components[count+1])
             count += 1
         return result
         
-    def union(self, index : Index, p1 : QueryComponent, p2 : QueryComponent):
+    def union(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> list[Posting]:
         answer = []
         inc1 = 0
         inc2 = 0
@@ -26,20 +26,26 @@ class OrQuery(QueryComponent):
         post2 = p2.get_postings(index)      # returns a list of postings
         # Recently this showed up as out of range, not sure if this fixed it
         # before it was while p1 and p2:
-        while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
+        while inc1 < len(post1) and inc2 < len(post2):
             if post1[inc1].doc_id == post2[inc2].doc_id:
-                if answer[-1] == post1[inc1].doc_id:
+                if answer[-1] == post1[inc1].doc_id:    # if the most recently added posting matches the current doc_id:
                     continue # ?
                 else:
-                    answer.append(post1[inc1].doc_id)
+                    answer.append(post1[inc1])
                     inc1 += 1
                     inc2 += 1
             elif post1[inc1].doc_id < post2[inc2].doc_id:
-                answer.append(post1[inc1].doc_id)
+                answer.append(post1[inc1])
                 inc1 += 1
-            else:
-                answer.append(post2[inc2].doc_id)
+            elif post1[inc1].doc_id > post2[inc2].doc_id:
+                answer.append(post2[inc2])
                 inc2 += 1
+        while inc1 == len(post1) and inc2 < len(post2):
+            answer.append(post2[inc2])
+            inc2 += 1
+        while inc2 == len(post2) and inc1 < len(post1):
+            answer.append(post1[inc1])
+            inc1 += 1            
         return answer
 
 

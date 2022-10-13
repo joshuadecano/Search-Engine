@@ -61,8 +61,13 @@ if __name__ == "__main__":
             continue
         if book is not None:
             print(type(book))
-            print(book.get_postings(index))
             #print(book.get_postings(index))
+            big_book = book.get_postings(index)
+            if big_book is None:
+                print("Term not found")
+            else:
+                for s in big_book:
+                    print(d.get_document(s.doc_id))
             #biik = d.get_document(book.get_postings(index).doc_id)
             #print(type(biik))
             #for p in biik:

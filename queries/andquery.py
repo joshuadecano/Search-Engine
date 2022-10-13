@@ -9,17 +9,16 @@ class AndQuery(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         result = []
-        print(self.components[1])
+        result.append(self.components[0])       # starts the list off with the first (term literal) object
+                                                # but this isnt right, it should just be a list of lists of postings
         count = 0
         num = len(self.components)     # number of terms in AND query
         while count < num-1:
-            result.append(self.intersect(index, self.components[count], self.components[count+1]))
+            result = self.intersect(index, result[count], self.components[count+1])
+            
             count += 1
-        for s in result:
-            print("ascascsa")
-            print(s)
         return result
-    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> Posting: 
+    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> list[Posting]: 
         answer = []
         post1 = p1.get_postings(index)      # returns a list of postings
         post2 = p2.get_postings(index)      # returns a list of postings
@@ -35,8 +34,7 @@ class AndQuery(QueryComponent):
             #while p1 and p2:
                 if post1[inc1].doc_id == post2[inc2].doc_id:
                 #if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
-                    print("intersecting")
-                    answer.append(post1[inc1].doc_id)
+                    answer.append(post1[inc1])
                     inc1 += 1
                     inc2 += 1
                 elif post1[inc1].doc_id < post2[inc2].doc_id:
