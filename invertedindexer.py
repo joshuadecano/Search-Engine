@@ -3,7 +3,7 @@ from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
-from queries import booleanqueryparser
+from queries import booleanqueryparser, querycomponent
 from io import StringIO
 import re
 
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         stemmer = Porter2Stemmer()
         token_processor = protokenprocessor.ProTokenProcessor()  
         fin_query = (stemmer.stem(query))
-        book = bqparser.parse_query(fin_query).get_postings(index)
+        book = bqparser.parse_query(fin_query)
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
@@ -60,25 +60,27 @@ if __name__ == "__main__":
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
         if book is not None:
-            if book is QueryComponent:
-                
-            count = 1
-            for p in book:
-                print("Document #", count, d.get_document(p.doc_id).title)
-                count += 1
-            print(len(book), "Documents found containing", query)
-            answer = 1
-            while answer != 0:
-                try:
-                    answer = int(input("To view a document, enter the Document #, else enter '0'\n"))
-                    if answer == 0:
-                        continue
-                    if int(answer) <= len(book):
-                        print("Title:", d.get_document(book[answer-1].doc_id).title)
-                        print(d.get_document(book[answer-1].doc_id).get_content().getvalue())
-                    else:
-                        print("Invalid selection")
-                except:
-                    print("Invalid input")
+
+            print(book.get_postings(index))
+##        if book is not None:
+##            count = 1
+##            big_book = book.get_postings(index)
+##            for p in big_book:
+##                print("Document #", count, d.get_document(p.doc_id).title)
+##                count += 1
+##            print(len(big_book), "Documents found containing", query)
+##            answer = 1
+##            while answer != 0:
+##                try:
+##                    answer = int(input("To view a document, enter the Document #, else enter '0'\n"))
+##                    if answer == 0:
+##                        continue
+##                    if int(answer) <= len(big_book):
+##                        print("Title:", d.get_document(big_book[answer-1].doc_id).title)
+##                        print(d.get_document(big_book[answer-1].doc_id).get_content().getvalue())
+##                    else:
+##                        print("Invalid selection")
+##                except:
+##                    print("Invalid input")
         else:
             print("no results")

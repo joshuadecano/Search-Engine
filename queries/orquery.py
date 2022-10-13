@@ -29,7 +29,7 @@ class OrQuery(QueryComponent):
         while inc1 < len(p1.get_postings()) and inc2 < len(p2.get_postings()):
             if post1[inc1].doc_id == post2[inc2].doc_id:
                 if answer[-1] == post1[inc1].doc_id:
-                    continue # ? 
+                    continue # ?
                 else:
                     answer.append(post1[inc1].doc_id)
                     inc1 += 1
