@@ -9,21 +9,22 @@ class AndQuery(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         result = []
-        result.append(self.components[0])
+        print(self.components[1])
         count = 0
         num = len(self.components)     # number of terms in AND query
-        #result = self.components[0]
         while count < num-1:
-            #for s in self.components:
-            result.append(self.intersect(index, result[count], self.components[count+1]))
+            result.append(self.intersect(index, self.components[count], self.components[count+1]))
             count += 1
+        for s in result:
+            print("ascascsa")
+            print(s)
         return result
-    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> list[Posting]:
+    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> Posting: 
         answer = []
         post1 = p1.get_postings(index)      # returns a list of postings
         post2 = p2.get_postings(index)      # returns a list of postings
         #print(len(post1))
-        #print(len(post2))
+        #print(len(post2))           # floral rock works but rock floral does not.. wtf???
         inc1 = 0
         inc2 = 0
         if post1 and post2 is not None:
@@ -34,6 +35,7 @@ class AndQuery(QueryComponent):
             #while p1 and p2:
                 if post1[inc1].doc_id == post2[inc2].doc_id:
                 #if p1.get_postings[inc1].doc_id == p2.get_postings[inc2].doc_id:
+                    print("intersecting")
                     answer.append(post1[inc1].doc_id)
                     inc1 += 1
                     inc2 += 1

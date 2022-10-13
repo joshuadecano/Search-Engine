@@ -42,7 +42,7 @@ if __name__ == "__main__":
         stemmer = Porter2Stemmer()
         token_processor = protokenprocessor.ProTokenProcessor()  
         fin_query = (stemmer.stem(query))
-        book = bqparser.parse_query(fin_query)
+        book = bqparser.parse_query(query)
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
@@ -62,13 +62,16 @@ if __name__ == "__main__":
         if book is not None:
             print(type(book))
             print(book.get_postings(index))
-            biik = book.get_postings(index)
-            print(type(biik))
-            for p in biik:
-                print(type(p))
-                anothaone = p.get_postings(index)
-                for s in anothaone:
-                    print(d.get_document(s.doc_id))
+            #print(book.get_postings(index))
+            #biik = d.get_document(book.get_postings(index).doc_id)
+            #print(type(biik))
+            #for p in biik:
+                #print(type(p))
+                #print("seven")
+                #anothaone = p.get_postings(index)
+                #for s in anothaone:
+                    #print("s")
+                    #print(d.get_document(s.doc_id))
                 #print(d.get_document(p.get_postings(index)))
                 #test = d.get_document(p.get_postings(index))
                 #for s in test:
