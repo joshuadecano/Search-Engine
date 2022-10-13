@@ -60,20 +60,34 @@ class BooleanQueryParser:
         while subquery[start_index] == ' ':
             start_index += 1
         
-        if subquery[start_index] == '"':        #if a double quote is found (indicating the beginning of a phrase literal)
-            start_index += 1                    #start index moves to the actual text values
-            next_space = subquery.find('"', start_index)    #finds the next double quote (indicating the end of the phrase literal) and sets it as the end of the literal.
-            if next_space < 0:
-            # No more literals in this subquery.
+        if subquery[start_index] == '"':        #if a double quote is found (indicating the beginning of a phrase literal)      "this term"
+            start_index += 1                                                                                                    #t
+
+                #start_index += 1                    #start index moves to the actual text values
+            print(subquery)
+            next_space = subquery.find(' ', start_index)    #finds the next double quote (indicating the end of the phrase literal) and sets it as the end of the literal.
+            next_quote = subquery.find('"', start_index)
+            if next_quote < 0:
                 length_out = sub_length - start_index
+            if next_space < next_quote:                     # this means that there are still terms in the phrase literal
+            # No more literals in this subquery.
+                #print(sub_length)
+                #print(start_index)
+                length_out = next_space
+                print("test")
+                
             else:
-                length_out = next_space - start_index
+                length_out = next_quote
+                #print(next_space)
+                #print(start_index)
+                #print("sas")
             return BooleanQueryParser._Literal(
                 BooleanQueryParser._StringBounds(start_index, length_out),
-                PhraseLiteral(subquery[start_index:start_index + length_out])
+                PhraseLiteral(subquery[start_index:next_quote])
             )
         # Locate the next space to find the end of this literal.
         next_space = subquery.find(' ', start_index)
+        #print(next_space)
         if next_space < 0:
             # No more literals in this subquery.
             length_out = sub_length - start_index
