@@ -8,20 +8,22 @@ class AndQuery(QueryComponent):
         self.components = components
 
     def get_postings(self, index : Index) -> list[Posting]:
-        result = []
-        result.append(self.components[0])       # starts the list off with the first (term literal) object
+        #result = []
+        result = self.components[0].get_postings(index)      # starts the list off with the first (term literal) object
                                                 # but this isnt right, it should just be a list of lists of postings
         count = 0
         num = len(self.components)     # number of terms in AND query
         while count < num-1:
-            result = self.intersect(index, result[count], self.components[count+1])
+            #p1 = self.components[count].get_postings(index)
+            p2 = self.components[count+1].get_postings(index)
+            result = self.intersect(result, p2)
             
             count += 1
         return result
-    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> list[Posting]: 
+    def intersect(self, post1: list[Posting] , post2 : list[Posting]) -> list[Posting]: 
         answer = []
-        post1 = p1.get_postings(index)      # returns a list of postings
-        post2 = p2.get_postings(index)      # returns a list of postings
+        #post1 = p1.get_postings(index)      # returns a list of postings
+        #post2 = p2.get_postings(index)      # returns a list of postings
         #print(len(post1))
         #print(len(post2))           # floral rock works but rock floral does not.. wtf???
         inc1 = 0
