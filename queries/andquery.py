@@ -18,7 +18,7 @@ class AndQuery(QueryComponent):
             result.append(self.intersect(index, result[count], self.components[count+1]))
             count += 1
         return result
-    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent):
+    def intersect(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> list[Posting]:
         answer = []
         post1 = p1.get_postings(index)      # returns a list of postings
         post2 = p2.get_postings(index)      # returns a list of postings

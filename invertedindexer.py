@@ -60,8 +60,21 @@ if __name__ == "__main__":
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
         if book is not None:
-
+            print(type(book))
             print(book.get_postings(index))
+            biik = book.get_postings(index)
+            print(type(biik))
+            for p in biik:
+                print(type(p))
+                anothaone = p.get_postings(index)
+                for s in anothaone:
+                    print(d.get_document(s.doc_id))
+                #print(d.get_document(p.get_postings(index)))
+                #test = d.get_document(p.get_postings(index))
+                #for s in test:
+                #    print(d.get_document(s.doc_id).title)
+            #print(d.get_document(book.get_postings(index))
+
 ##        if book is not None:
 ##            count = 1
 ##            big_book = book.get_postings(index)
