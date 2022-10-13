@@ -20,7 +20,8 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         dex = 0             # new for proj
         for n in tokensz:
-            temp = re.sub(whitespace_re, "", n).lower()    
+            #temp = re.sub(whitespace_re, "", n).lower()    
+            temp = n.lower()
             if len(temp) != 0:
                 itt = token_processor.process_token(n)
                 for s in itt:

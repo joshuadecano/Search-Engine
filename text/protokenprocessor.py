@@ -8,14 +8,18 @@ class ProTokenProcessor(TokenProcessor):
     from the token, and converting it to all lowercase."""
     whitespace_re = re.compile(r"\W+")
 
-    def process_token(self, token : str) -> Iterable[str]:      # Now we will be returning a list of strings, 
+    def process_token(self, token : str) -> Iterable[str]:      # Now we will be returning a list of strings,
         final_return = []                                       # (explains why hewlettpackardcomputing, hewlett, packard, and computing have the same position #)
         stemmer = Porter2Stemmer()
-        #temp = re.sub(self.whitespace_re, "", token).lower()    
-        if not token[0].isalnum():   # removes the first letter if its not alphanumeric
-            token = token[1:]
-        if not token[-1].isalnum():  # removes the last letter if its not alphanumeric
-            token = token[:-1]
+        token.lower()
+        #temp = re.sub(self.whitespace_re, "", token).lower()
+        while token != "":                  # while the term is not empty
+            while not token[0].isalnum():   # removes the first letter if its not alphanumeric
+                token = token[1:]
+            while not token[-1].isalnum():  # removes the last letter if its not alphanumeric
+                token = token[:-1]
+        if token == "":
+            return None
         re.sub("'","", token)    # removes apostrophes
         re.sub('"',"",token)     # removes quotation marks
         stemd = stemmer.stem(token)
