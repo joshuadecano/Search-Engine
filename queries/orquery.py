@@ -30,7 +30,7 @@ class OrQuery(QueryComponent):
         while inc1 < len(post1) and inc2 < len(post2):
             if post1[inc1].doc_id == post2[inc2].doc_id:
                 if answer[-1] == post1[inc1].doc_id:    # if the most recently added posting matches the current doc_id:
-                    continue # ?
+                    break # ?
                 else:
                     answer.append(post1[inc1])
                     inc1 += 1

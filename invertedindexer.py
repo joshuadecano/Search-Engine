@@ -66,8 +66,24 @@ if __name__ == "__main__":
             if big_book is None:
                 print("Term not found")
             else:
+                count = 1
                 for s in big_book:
-                    print(d.get_document(s.doc_id))
+                    print("Document #", count, d.get_document((s.doc_id)))
+                    count += 1
+                print(len(big_book), "Documents found containing", query)
+                answer = 1
+                while answer != 0:
+                    try:
+                        answer = int(input("To view a document, enter the Document #, else enter '0'\n"))
+                        if answer == 0:
+                            continue
+                        if int(answer) <= len(big_book):
+                            print("Title:", d.get_document(big_book[answer-1].doc_id).title)
+                            print(d.get_document(big_book[answer-1].doc_id).get_content().getvalue())
+                        else:
+                            print("Invalid selection")
+                    except:
+                        print("Invalid input")
             #biik = d.get_document(book.get_postings(index).doc_id)
             #print(type(biik))
             #for p in biik:
