@@ -8,22 +8,23 @@ class OrQuery(QueryComponent):
         self.components = components
 
     def get_postings(self, index : Index) -> list[Posting]:
-        result = []
-        result.append(self.components[0])
+        #result = []
+        result = self.components[0].get_postings(index)  
         count = 0
         num = len(self.components)     # number of terms in AND query
         while count < num - 1:
             #for s in self.components:
-            result = self.union(index, result[count], self.components[count+1])
+            p2 = self.components[count+1].get_postings(index)
+            result = self.union(result, p2)
             count += 1
         return result
         
-    def union(self, index : Index, p1 : QueryComponent, p2 : QueryComponent) -> list[Posting]:
+    def union(self, post1: list[Posting] , post2 : list[Posting]) -> list[Posting]:
         answer = []
         inc1 = 0
         inc2 = 0
-        post1 = p1.get_postings(index)      # returns a list of postings
-        post2 = p2.get_postings(index)      # returns a list of postings
+        #post1 = p1.get_postings(index)      # returns a list of postings
+        #post2 = p2.get_postings(index)      # returns a list of postings
         # Recently this showed up as out of range, not sure if this fixed it
         # before it was while p1 and p2:
         while inc1 < len(post1) and inc2 < len(post2):
