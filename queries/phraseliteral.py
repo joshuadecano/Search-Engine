@@ -18,19 +18,16 @@ class PhraseLiteral(QueryComponent):
         print(answer)
         term_count = len(self.terms)        # number of terms in phrase literal
         comparisons = term_count - 1        # amount of comparisons we will need
-        count = 0   
         for s in range(comparisons):        # for each comparison
-            self.pos_match(index, answer, self.terms[count+1], count+1)
-            count += 1
-
+            self.pos_match(index, answer, self.terms[s+1], s+1)
         return answer
     def doc_match(self, index, term1 : str, term2 : str) -> list[int]:
-        doc_list = []                           # holds the list for document IDs
+        doc_list = []                             # holds the list for document IDs
         posting_list2 = []
         posted = []
         
         list1 = index.get_postings(term1)       # gets the postings for term1
-        print(list1)
+        #print(list1)
         list2 = index.get_postings(term2)
         for s in list1:
             for t in list2:
@@ -43,13 +40,16 @@ class PhraseLiteral(QueryComponent):
         #print(term2)
         doc_list = self.doc_match(index, term1, term2)                  
         second_list = []    # holds the list for positions
-        list1 = index.get_postings(term1)
-        list2 = index.get_postings(term2)
-        for s in doc_list:                      
-            for t in list1:
+        list1 = index.get_postings(term1)                       # list of postings
+        list2 = index.get_postings(term2)                       # list of postings
+        for s in doc_list:                 # for each document id stored                 
+            for t in list1:                # for each posting for a given term
+                #if t.doc
+                #
+                #
                 for u in list2:
                     while t.doc_id == s:
-                        if (t.position - k) == u.position:
+                        if (t.position[s] - k) == u.position:       # changed to t.position[s] because the S will be the doc_id, need to check what it returns
                             second_list.append(s.position)
         return second_list
 

@@ -3,20 +3,36 @@ from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
-from queries import booleanqueryparser, querycomponent
-from io import StringIO
+from queries import booleanqueryparser
 import re
 import time
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
 
+def stem_this(firstphrase : str) -> str:
+    stemmer = Porter2Stemmer()
+    secondphrase = []
+    final_phrase = ""
+    for t in firstphrase.split(" "):
+        tok = t.strip()
+        if len(tok) > 0:
+            secondphrase.append(tok)
+    for s in secondphrase: 
+        temp = stemmer.stem(s)
+        final_phrase += " "
+        final_phrase += temp
+    return final_phrase
+
 def index_corpus(corpus : DocumentCorpus) -> Index:
     whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = set()
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
+    #nums = 1
     for c in corpus:
+        #nums += 1 
+        #print(nums)
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         dex = 0             # new for proj
         for n in tokensz:
@@ -24,31 +40,31 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
             temp = n.lower()
             if len(temp) != 0:
                 itt = token_processor.process_token(n)
-                for s in itt:
-                    vocabulary.add(s)
-                    tdi.add_term(s, c.id, dex)
-                    dex += 1        # increments by 1 for every token passed in to add_term
+                if itt is not None:
+                    for s in itt:
+                        vocabulary.add(s)
+                        tdi.add_term(s, c.id, dex)
+                        dex += 1        # increments by 1 for every token passed in to add_term
     return tdi
 
 if __name__ == "__main__":
     start = time.time()
     corpus_path = Path()
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-    # Build the index over this directory.
     index = index_corpus(d)
     stop = time.time()
     print("Indexing took", stop-start, "seconds")
-    # We aren't ready to use a full query parser;
-    # for now, we'll only support single-term queries.
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
-
     while query != ":q":
         query = input("Enter a query: ")
-        stemmer = Porter2Stemmer()
-        token_processor = protokenprocessor.ProTokenProcessor()  
-        fin_query = (stemmer.stem(query))
-        book = bqparser.parse_query(query)
+        stemmer = Porter2Stemmer()                                      # creates the stemmer object
+        #token_processor = protokenprocessor.ProTokenProcessor()         # creates the token processor object
+        #proc = token_processor.process_token(query)     #returns a list of words which have been processed (fires in yosemite) -> (fire in yosemit)
+        #print("proc:", proc)
+        fin_query = stem_this(query)                     # stems the list of words
+        #print("fin_query:", fin_query)                            # prints the final list of words which are stemmed
+        book = bqparser.parse_query(fin_query)          # this will return a query component, basically holds a list of postings
         if query.startswith(':stem'):
             stemmer = Porter2Stemmer()
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
@@ -65,8 +81,8 @@ if __name__ == "__main__":
                 print(testss[i])
             print(f"Total number of vocabulary terms: {len(testss)}")
             continue
-        if book is not None:
-            big_book = book.get_postings(index)
+        if book is not None:                            # if there are no query results
+            big_book = book.get_postings(index)         # returns a list of postings
             if big_book is None:
                 print("Term not found")
             else:
