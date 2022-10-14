@@ -19,39 +19,70 @@ class PhraseLiteral(QueryComponent):
         term_count = len(self.terms)        # number of terms in phrase literal
         comparisons = term_count - 1        # amount of comparisons we will need
         for s in range(comparisons):        # for each comparison
-            self.pos_match(index, answer, self.terms[s+1], s+1)
+            answer = self.positional_intersect(index, answer, self.terms[s+1], s+1)
         return answer
-    def doc_match(self, index, term1 : str, term2 : str) -> list[int]:
-        doc_list = []                             # holds the list for document IDs
-        posting_list2 = []
-        posted = []
-        
-        list1 = index.get_postings(term1)       # gets the postings for term1
-        #print(list1)
+
+    def position_compare(self, index, p1 : list[int], p2 : list[int], k : int):
+        result = []
+        for a in p1:
+            for b in p2:
+                if abs(a - b) <= k:
+                    result.append(b)
+                elif b > a:
+                    break
+        return result
+
+    def positional_intersect(self, index, term1: str, term2: str, k : int) -> list[Posting]:
+        list1 = index.get_postings(term1)
         list2 = index.get_postings(term2)
         for s in list1:
             for t in list2:
                 if s.doc_id == t.doc_id:
-                    doc_list.append(s.doc_id)       # holds the document IDs where both terms appear
-        return doc_list
+                    ell = []
+                    pp1 = s.position            # holds a list of positions for term1
+                    pp2 = t.position            # holds a list of positions for term2
+                    ell = self.position_compare(index, pp1, pp2, k)
+        return ell
+
+
+
+
+
     
-    def pos_match(self, index, term1 : str, term2 : str, k : int):      # takes in the index, first and second term, and gap (k)
-        #print(term1)
-        #print(term2)
-        doc_list = self.doc_match(index, term1, term2)                  
-        second_list = []    # holds the list for positions
-        list1 = index.get_postings(term1)                       # list of postings
-        list2 = index.get_postings(term2)                       # list of postings
-        for s in doc_list:                 # for each document id stored                 
-            for t in list1:                # for each posting for a given term
-                #if t.doc
-                #
-                #
-                for u in list2:
-                    while t.doc_id == s:
-                        if (t.position[s] - k) == u.position:       # changed to t.position[s] because the S will be the doc_id, need to check what it returns
-                            second_list.append(s.position)
-        return second_list
+##    def doc_match(self, index, term1 : str, term2 : str) -> list[int]:
+##        doc_list = []                             # holds the list for document IDs
+##        posting_list2 = []
+##        posted = []
+##        
+##        list1 = index.get_postings(term1)       # gets the postings for term1
+##        #print(list1)
+##        list2 = index.get_postings(term2)
+##        for s in list1:
+##            for t in list2:
+##                if s.doc_id == t.doc_id:
+##                    doc_list.append(s.doc_id)       # holds the document IDs where both terms appear
+##        return doc_list
+##    
+##    def pos_match(self, index, term1 : str, term2 : str, k : int):      # takes in the index, first and second term, and gap (k)
+##        #print(term1)
+##        #print(term2)
+##        doc_list = self.doc_match(index, term1, term2)                  
+##        second_list = []    # holds the list for positions
+##        list1 = index.get_postings(term1)                       # list of postings
+##        list2 = index.get_postings(term2)                       # list of postings      
+##        for s in doc_list:                 # for each document id stored                 
+##            for t in list1:                # for each posting for a given term
+##                for z in t.position:
+##                    while t.doc_id == s:
+##                        if (z - k) == 
+##                #if t.doc
+##                #
+##                #                                      # list1 = postings objects (also has doc_id and position)
+##                for u in list2:                        # t = posting objects(has doc_id and position), to get position, t.position
+##                    while t.doc_id == s:               # s = doc_ids (49,20) 
+##                        if (t.position[s] - k) == u.position:       # changed to t.position[s] because the S will be the doc_id, need to check what it returns
+##                            second_list.append(s.position)
+##        return second_list
 
         # TODO: program this method. Retrieve the postings for the individual terms in the phrase,
 		# and positional merge them together.
