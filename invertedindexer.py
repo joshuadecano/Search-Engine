@@ -3,7 +3,7 @@ from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
-from queries import booleanqueryparser
+from queries import booleanqueryparser, querycomponent
 import re
 import time
 
@@ -22,15 +22,27 @@ def stem_this(firstphrase : str) -> str:
                 tok = tok[1:]
             if not tok[-1].isalnum():  # removes the last letter if its not alphanumeric
                 tok = tok[:-1]
-                temp = stemmer.stem(tok)
-                print(temp)
-                secondphrase.append(temp)
+            temp = stemmer.stem(tok)
+            print(temp)
+            secondphrase.append(temp)
     #for s in secondphrase: 
     #    final_phrase += " "
     #    final_phrase += temp 
 
-    return " ".join(secondphrase)
+    return '"' + " ".join(secondphrase) + '"'
     #return final_phrase
+
+def new_stem(firstphrase : str) -> str:
+    stemmer = Porter2Stemmer()
+    secondphrase =[]
+    print("here i am")
+    for t in firstphrase.split(" "):
+        tok = t.strip()
+        if len(tok) > 0:
+            token = stemmer.stem(tok)
+            secondphrase.append(token)
+            
+    return " ".join(secondphrase)
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
     whitespace_re = re.compile(r"\W+")
@@ -71,10 +83,11 @@ if __name__ == "__main__":
         #proc = token_processor.process_token(query)     #returns a list of words which have been processed (fires in yosemite) -> (fire in yosemit)
         #print("proc:", proc)
         if query[0] == '"' and query[-1] == '"':
-            query = stem_this(query)  
+            query = stem_this(query)
+        fin_query = new_stem(query)
         #query = stem_this(query)                     # stems the list of words
         print("fin_query:", query)                            # prints the final list of words which are stemmed
-        book = bqparser.parse_query(query)          # this will return a query component, basically holds a list of postings
+        book = bqparser.parse_query(fin_query)          # this will return a query component, basically holds a list of postings
         if query.startswith(':stem'):
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
             token = ' '.join(query.split()[1:])

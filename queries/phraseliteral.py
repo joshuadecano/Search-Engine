@@ -45,7 +45,7 @@ class PhraseLiteral(QueryComponent):
         result = []
         for a in p1:
             for b in p2:
-                if abs(a - b) <= k:
+                if abs(a - b) <= k:         # got an error saying i cant subtract NoneType and int
                     #result.append(a)
                     return a
                 elif b > a:
