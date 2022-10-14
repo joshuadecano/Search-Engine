@@ -17,10 +17,13 @@ class PhraseLiteral(QueryComponent):
         answer.append(self.terms[0])           # starting off with the first term
         print(answer)
         print(type(answer))
-        term_count = len(self.terms)        # number of terms in phrase literal
-        comparisons = term_count - 1        # amount of comparisons we will need
-        for s in range(comparisons):        # for each comparison
-            answer = self.positional_intersect(index, terms, self.terms[s+1], s+1)
+        #term_count = len(self.terms)        # number of terms in phrase literal
+        comparisons = len(self.terms) - 1        # amount of comparisons we will need
+        for s in range(comparisons):        # for each comparison                   
+            next_one = []
+            next_one.append(self.terms[s+1])
+            answer = self.positional_intersect(index, answer, next_one, s+1)
+
         return answer
 
     def position_compare(self, index : Index, p1 : list[int], p2 : list[int], k : int) -> list[int]:
@@ -33,7 +36,7 @@ class PhraseLiteral(QueryComponent):
                     break
         return result
 
-    def positional_intersect(self, index : Index, term1: str, term2: str, k : int) -> list[Posting]:
+    def positional_intersect(self, index : Index, term1: list[str], term2: list[str], k : int) -> list[Posting]:
         list1 = index.get_postings(term1)
         list2 = index.get_postings(term2)
         for s in list1:
