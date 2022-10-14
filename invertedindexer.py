@@ -17,12 +17,20 @@ def stem_this(firstphrase : str) -> str:
     for t in firstphrase.split(" "):
         tok = t.strip()
         if len(tok) > 0:
-            secondphrase.append(tok)
-    for s in secondphrase: 
-        temp = stemmer.stem(s)
-        final_phrase += " "
-        final_phrase += temp
-    return final_phrase
+            print(tok)
+            if not tok[0].isalnum():   # removes the first letter if its not alphanumeric
+                tok = tok[1:]
+            if not tok[-1].isalnum():  # removes the last letter if its not alphanumeric
+                tok = tok[:-1]
+                temp = stemmer.stem(tok)
+                print(temp)
+                secondphrase.append(temp)
+    #for s in secondphrase: 
+    #    final_phrase += " "
+    #    final_phrase += temp 
+
+    return " ".join(secondphrase)
+    #return final_phrase
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
     whitespace_re = re.compile(r"\W+")
@@ -62,11 +70,12 @@ if __name__ == "__main__":
         #token_processor = protokenprocessor.ProTokenProcessor()         # creates the token processor object
         #proc = token_processor.process_token(query)     #returns a list of words which have been processed (fires in yosemite) -> (fire in yosemit)
         #print("proc:", proc)
-        fin_query = stem_this(query)                     # stems the list of words
-        #print("fin_query:", fin_query)                            # prints the final list of words which are stemmed
-        book = bqparser.parse_query(fin_query)          # this will return a query component, basically holds a list of postings
+        if query[0] == '"' and query[-1] == '"':
+            query = stem_this(query)  
+        #query = stem_this(query)                     # stems the list of words
+        print("fin_query:", query)                            # prints the final list of words which are stemmed
+        book = bqparser.parse_query(query)          # this will return a query component, basically holds a list of postings
         if query.startswith(':stem'):
-            stemmer = Porter2Stemmer()
             token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
             token = ' '.join(query.split()[1:])
             print(stemmer.stem(token))

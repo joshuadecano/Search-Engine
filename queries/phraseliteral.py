@@ -14,39 +14,65 @@ class PhraseLiteral(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         answer = []
-        answer.append(self.terms[0])           # starting off with the first term
-        print(answer)
-        print(type(answer))
+        answer = index.get_postings(self.terms[0])
+        #answer.append(index.get_postings(self.terms[0]))       # starting off with the first term
+        #print(answer)
+        #print(type(answer))
         #term_count = len(self.terms)        # number of terms in phrase literal
         comparisons = len(self.terms) - 1        # amount of comparisons we will need
-        for s in range(comparisons):        # for each comparison                   
-            next_one = []
-            next_one.append(self.terms[s+1])
-            answer = self.positional_intersect(index, answer, next_one, s+1)
+        print(comparisons)
+        for s in range(comparisons):        # for each comparison       
+            #list1 = index.get_postings(answer[0])      
+            list2 = index.get_postings(self.terms[s+1])
+##            for s in list1:
+##                for t in list2:
+##                    if s.doc_id == t.doc_id:
+##                        pp1 = []                    #list to hold positions
+##                        pp2 = []                    #list to hold positions
+##                        pp1.append(s.position)
+##                        pp2.append(t.position)
+                        #ell = []
+                        #ell = s.position            # holds a list of positions for term1
+                        #pp2 = t.position            # holds a list of positions for term2
+                        #ell = self.position_compare(index, ell, pp2, s+1)
+            #next_one = []
+            #next_one.append(self.terms[s+1])
+            answer = self.positional_intersect(index, answer, list2, s+1)
 
         return answer
 
-    def position_compare(self, index : Index, p1 : list[int], p2 : list[int], k : int) -> list[int]:
+    def position_compare(self, index : Index, p1 : list[int], p2 : list[int], k : int) -> list[int]:            #checks the posting positions
         result = []
         for a in p1:
             for b in p2:
                 if abs(a - b) <= k:
-                    result.append(b)
+                    #result.append(a)
+                    return a
                 elif b > a:
                     break
-        return result
+        #return result
 
-    def positional_intersect(self, index : Index, term1: list[str], term2: list[str], k : int) -> list[Posting]:
-        list1 = index.get_postings(term1)
-        list2 = index.get_postings(term2)
-        for s in list1:
-            for t in list2:
+    def positional_intersect(self, index : Index, p_list1: list[Posting], p_list2: list[Posting], k : int) -> list[Posting]:        # ANDs postings of both lists
+        #list1 = index.get_postings(term1)
+        #list2 = index.get_postings(term2)
+        new_posting_list = []
+        for s in p_list1:
+            for t in p_list2:
+                #print(s, "and", t)
                 if s.doc_id == t.doc_id:
-                    ell = []
-                    pp1 = s.position            # holds a list of positions for term1
-                    pp2 = t.position            # holds a list of positions for term2
-                    ell = self.position_compare(index, pp1, pp2, k)
-        return ell
+                    post = Posting(s.doc_id)
+                    pp1 = []
+                    pp2 = []
+                    pp1 = s.position
+                    pp2 = t.position
+                    positions = self.position_compare(index,pp1,pp2,k)
+                    post.add_position(positions)
+                    new_posting_list.append(post)
+                    #ell = []
+                    #pp1 = s.position            # holds a list of positions for term1
+                    #pp2 = t.position            # holds a list of positions for term2
+                    #new_posting_list.append(self.position_compare(index, pp1, pp2, k))
+        return new_posting_list
 
 
 
