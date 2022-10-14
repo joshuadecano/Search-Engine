@@ -14,13 +14,14 @@ class PhraseLiteral(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         answer = []
+        print("called")
         answer = index.get_postings(self.terms[0])
         #answer.append(index.get_postings(self.terms[0]))       # starting off with the first term
         #print(answer)
         #print(type(answer))
         #term_count = len(self.terms)        # number of terms in phrase literal
         comparisons = len(self.terms) - 1        # amount of comparisons we will need
-        print(comparisons)
+        #print(comparisons)
         for s in range(comparisons):        # for each comparison       
             #list1 = index.get_postings(answer[0])      
             list2 = index.get_postings(self.terms[s+1])
@@ -45,11 +46,12 @@ class PhraseLiteral(QueryComponent):
         result = []
         for a in p1:
             for b in p2:
-                if abs(a - b) <= k:         # got an error saying i cant subtract NoneType and int
+                if a and b is not None:
+                    if abs(a - b) <= k:         # got an error saying i cant subtract NoneType and int
                     #result.append(a)
-                    return a
-                elif b > a:
-                    break
+                        return a
+                    elif b > a:
+                        break
         #return result
 
     def positional_intersect(self, index : Index, p_list1: list[Posting], p_list2: list[Posting], k : int) -> list[Posting]:        # ANDs postings of both lists
@@ -58,8 +60,8 @@ class PhraseLiteral(QueryComponent):
         new_posting_list = []
         for s in p_list1:
             for t in p_list2:
-                #print(s, "and", t)
                 if s.doc_id == t.doc_id:
+                    #if s.position and t.position is not None:
                     post = Posting(s.doc_id)
                     pp1 = []
                     pp2 = []
