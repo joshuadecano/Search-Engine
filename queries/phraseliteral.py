@@ -15,6 +15,7 @@ class PhraseLiteral(QueryComponent):
     def get_postings(self, index : Index) -> list[Posting]:
         answer = []
         print("called")
+        print(self.terms)
         answer = index.get_postings(self.terms[0])
         #answer.append(index.get_postings(self.terms[0]))       # starting off with the first term
         #print(answer)
@@ -48,7 +49,7 @@ class PhraseLiteral(QueryComponent):
             for b in p2:
                 if a and b is not None:
                     if abs(a - b) <= k:         # got an error saying i cant subtract NoneType and int
-                    #result.append(a)
+                        result.append(a)
                         return a
                     elif b > a:
                         break
