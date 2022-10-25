@@ -94,6 +94,7 @@ class BooleanQueryParser:
             #    length_out = sub_length - start_quote
             #else:
             #    length_out = end
+            
             return BooleanQueryParser._Literal(
                 BooleanQueryParser._StringBounds(start_quote, end_quote),
                 PhraseLiteral(subquery[start_quote:start_quote + end_quote])
@@ -106,7 +107,8 @@ class BooleanQueryParser:
             length_out = sub_length - start_index
         else:
             length_out = next_space - start_index
-        
+        print("start index: ", start_index)
+        print("length out: ", length_out)
         # This is a term literal containing a single term.
         return BooleanQueryParser._Literal(
             BooleanQueryParser._StringBounds(start_index, length_out),
