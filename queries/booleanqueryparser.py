@@ -66,11 +66,13 @@ class BooleanQueryParser:
             start_index += 1                                                                                                    #t
             next_space = subquery.find(' ', start_index)    #finds the next double quote (indicating the end of the phrase literal) and sets it as the end of the literal.
             end_quote = subquery.find('"', start_index)
-            end_quote += 1
+            #end_quote += 1
             if end_quote < 0:
                 length_out = sub_length - start_quote
             print(subquery[start_index:end_quote])
-            for t in subquery[start_quote:end_quote].split(" "):
+            # changed start_quote to start_index below, since it would add the first quote to the list.
+            # 
+            for t in subquery[start_index:end_quote].split(" "):
                 tok = t.strip()
                 if len(tok) > 0:
                     phrase.append(tok)
@@ -97,7 +99,8 @@ class BooleanQueryParser:
             
             return BooleanQueryParser._Literal(
                 BooleanQueryParser._StringBounds(start_quote, end_quote),
-                PhraseLiteral(subquery[start_quote:start_quote + end_quote])
+                #PhraseLiteral(subquery[start_quote:start_quote + end_quote])
+                PhraseLiteral(phrase)
             )
         # Locate the next space to find the end of this literal.
         next_space = subquery.find(' ', start_index)

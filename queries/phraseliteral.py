@@ -18,8 +18,9 @@ class PhraseLiteral(QueryComponent):
         print(self.terms)
         answer = index.get_postings(self.terms[0])
         #answer.append(index.get_postings(self.terms[0]))       # starting off with the first term
-        #print(answer)
+        print("answer = ", answer)
         #print(type(answer))
+        print("self.terms = ", self.terms[0])
         #term_count = len(self.terms)        # number of terms in phrase literal
         comparisons = len(self.terms) - 1        # amount of comparisons we will need
         #print(comparisons)
