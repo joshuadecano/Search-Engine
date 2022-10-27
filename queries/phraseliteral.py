@@ -49,10 +49,12 @@ class PhraseLiteral(QueryComponent):
         for a in p1:
             for b in p2:
                 if a and b is not None:
-                    if abs(a - b) <= k:         # got an error saying i cant subtract NoneType and int
+                    if abs(a-b) == k:
+                    #if abs(a - b) <= k:         # got an error saying i cant subtract NoneType and int
                         result.append(a)
                         return a
-                    elif b > a:
+                    #elif b > a:
+                    else:
                         break
         #return result
 

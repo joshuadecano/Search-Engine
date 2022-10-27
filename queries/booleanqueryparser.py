@@ -89,8 +89,8 @@ class BooleanQueryParser:
                 #print(next_space)
                 #print(start_index)
                 #print("sas")
-            print("phrase:",phrase)
-            print(start_quote, "and" , end_quote)
+            print("phrase: ",phrase)
+            print(start_quote, " and " , end_quote)
             next_space = subquery.find(' ', start_index)
             #if next_space < 0:
             #    length_out = sub_length - start_quote
@@ -98,9 +98,10 @@ class BooleanQueryParser:
             #    length_out = end
             
             return BooleanQueryParser._Literal(
-                BooleanQueryParser._StringBounds(start_quote, end_quote),
+                BooleanQueryParser._StringBounds(start_quote, end_quote + 1),
                 #PhraseLiteral(subquery[start_quote:start_quote + end_quote])
-                PhraseLiteral(phrase)
+                PhraseLiteral(phrase)      # this one works but there is like one more error left over
+                # check photo at 2:03
             )
         # Locate the next space to find the end of this literal.
         next_space = subquery.find(' ', start_index)
@@ -110,6 +111,8 @@ class BooleanQueryParser:
             length_out = sub_length - start_index
         else:
             length_out = next_space - start_index
+        print("sub_length: ", sub_length)
+        print("next_space: ", next_space)
         print("start index: ", start_index)
         print("length out: ", length_out)
         # This is a term literal containing a single term.

@@ -9,6 +9,7 @@ class AndQuery(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         #result = []
+        print("what am i doing here")
         result = self.components[0].get_postings(index)      # starts the list off with the first (term literal) object
                                                 # but this isnt right, it should just be a list of lists of postings
         count = 0
