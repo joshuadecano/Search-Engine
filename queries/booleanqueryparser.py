@@ -66,7 +66,6 @@ class BooleanQueryParser:
             start_index += 1                                                                                                    #t
             next_space = subquery.find(' ', start_index)    #finds the next double quote (indicating the end of the phrase literal) and sets it as the end of the literal.
             end_quote = subquery.find('"', start_index)
-            #end_quote += 1
             if end_quote < 0:
                 length_out = sub_length - start_quote
             print(subquery[start_index:end_quote])
@@ -76,27 +75,9 @@ class BooleanQueryParser:
                 tok = t.strip()
                 if len(tok) > 0:
                     phrase.append(tok)
-            #if next_quote < 0:
-            #    length_out = sub_length - start_index
-            #if next_space < next_quote:                     # this means that there are still terms in the phrase literal
-            # No more literals in this subquery.
-                #print(sub_length)
-                #print(start_index)
-            #    length_out = next_space
-                
-            #else:
-            #    length_out = next_quote
-                #print(next_space)
-                #print(start_index)
-                #print("sas")
             print("phrase: ",phrase)
             print(start_quote, " and " , end_quote)
             next_space = subquery.find(' ', start_index)
-            #if next_space < 0:
-            #    length_out = sub_length - start_quote
-            #else:
-            #    length_out = end
-            
             return BooleanQueryParser._Literal(
                 BooleanQueryParser._StringBounds(start_quote, end_quote + 1),
                 #PhraseLiteral(subquery[start_quote:start_quote + end_quote])
