@@ -5,7 +5,7 @@ import sqlite3
 def write_index(pi : PositionalInvertedIndex):
     f = open("postings.bin","wb")
     vocab = pi.vocabulary()
-    connection = sqlite3.connect("")
+    connection = sqlite3.connect("bytepositions.db")
     cursor = connection.cursor()
     cursor.execute("CREATE TABLE bytes (position INTEGER)")
     add_byte_position = ("INSERT INTO bytes "
