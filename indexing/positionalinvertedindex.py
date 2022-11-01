@@ -12,6 +12,7 @@ class PositionalInvertedIndex(Index):
         self.hasheroni = {}
         self.vocabular = vocab
         self.corpus_size = corpus_size
+        #self.term_count = {}
 
     def add_term(self, term : str, doc_id : int, position : int):   #pass in the integer position of the term within the document in addition to the doc id and string
         # TO DO: rather than adding individual postings to the hashmap and just having the key as the term and the values as a list of postings of doc_ids with the term, 

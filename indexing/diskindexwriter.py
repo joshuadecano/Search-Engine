@@ -1,9 +1,11 @@
 from indexing import Index, PositionalInvertedIndex
 from pathlib import Path
 import struct
-import math
+#import math
 import sqlite3
-import numpy as np
+#import numpy as np
+
+
 def write_index(pi : PositionalInvertedIndex, deva_path : Path, weights : list[float]):
     hashmap = {}
     anomap = {} # key : doc_id, value : term
@@ -54,15 +56,15 @@ def write_index(pi : PositionalInvertedIndex, deva_path : Path, weights : list[f
 #
     preta_path = deva_path + "/docWeights.bin"
     g = open(preta_path,"rb")
-    for c in pi.corpus_size: # for each document
-        sum = 0
-        for d in anomap[c]:
-            temp = (1 + np.log(d))
-            sum += temp**2
-        ld = math.sqrt(sum)
+#    for c in pi.corpus_size: # for each document
+#        sum = 0
+#        for d in anomap[c]:
+#            temp = (1 + np.log(d))
+#            sum += temp**2
+#        ld = math.sqrt(sum)
         
-        g.write(struct.pack('d', ld))
-    g.close()
+#        g.write(struct.pack('d', ld))
+#    g.close()
 # to calculate document weights i need
 # a way to walk down the documents in order
 # a way to check to see if the term occurs in the document
