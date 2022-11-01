@@ -59,8 +59,10 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     return tdi
 
 if __name__ == "__main__":
+    user_path = input("Enter corpus path: ")
+    corpus_path = Path(user_path)
     start = time.time()
-    corpus_path = Path()
+    #corpus_path = Path()
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
     index = index_corpus(d)
     stop = time.time()
@@ -83,8 +85,11 @@ if __name__ == "__main__":
             print(stemmer.stem(token))
             continue
         if query.startswith(':index'):
-            token_processor = protokenprocessor.ProTokenProcessor()
-            token = ' '.join(query.split()[1:])
+            #token_processor = protokenprocessor.ProTokenProcessor()
+            newpath = query.split()[1:]
+            print(newpath)
+            corpus_path = Path(newpath)
+            d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             continue
         if query.startswith(':vocab'):
             testss = sorted(index.vocabulary())

@@ -2,8 +2,9 @@ from indexing import Index, PositionalInvertedIndex
 from pathlib import Path
 import struct
 import sqlite3
-def write_index(pi : PositionalInvertedIndex):
-    f = open("postings.bin","wb")
+def write_index(pi : PositionalInvertedIndex, deva_path : Path):
+    asura_path = deva_path + "postings.bin"
+    f = open(asura_path,"wb")
     vocab = pi.vocabulary()
     connection = sqlite3.connect("bytepositions.db")
     cursor = connection.cursor()
