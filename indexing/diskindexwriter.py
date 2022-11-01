@@ -4,10 +4,10 @@ import struct
 import math
 import sqlite3
 import numpy as np
-def write_index(pi : PositionalInvertedIndex, deva_path : Path):
+def write_index(pi : PositionalInvertedIndex, deva_path : Path, weights : list[float]):
     hashmap = {}
     anomap = {} # key : doc_id, value : term
-    asura_path = deva_path + "postings.bin"
+    asura_path = deva_path + "/postings.bin"
     f = open(asura_path,"rb")
     vocab = pi.vocabulary()
     connection = sqlite3.connect("bytepositions.db")
@@ -52,7 +52,7 @@ def write_index(pi : PositionalInvertedIndex, deva_path : Path):
 #not sure if i need to close this
     f.close()
 #
-    preta_path = deva_path + "docWeights.bin"
+    preta_path = deva_path + "/docWeights.bin"
     g = open(preta_path,"rb")
     for c in pi.corpus_size: # for each document
         sum = 0
@@ -62,6 +62,7 @@ def write_index(pi : PositionalInvertedIndex, deva_path : Path):
         ld = math.sqrt(sum)
         
         g.write(struct.pack('d', ld))
+    g.close()
 # to calculate document weights i need
 # a way to walk down the documents in order
 # a way to check to see if the term occurs in the document
