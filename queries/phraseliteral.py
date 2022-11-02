@@ -37,20 +37,29 @@ class PhraseLiteral(QueryComponent):
 
     def positional_intersect(self, index : Index, p_list1: list[Posting], p_list2: list[Posting], k : int) -> list[Posting]:        # ANDs postings of both lists
         new_posting_list = []
-        for s in p_list1:
-            for t in p_list2:
-                if s.doc_id == t.doc_id:
-                    post = Posting(s.doc_id)
-                    pp1 = []
-                    pp2 = []
-                    pp1 = s.position
-                    pp2 = t.position
-                    positions = self.position_compare(index,pp1,pp2,k)
-                    if positions:
-                        post.add_position(positions)
-                        new_posting_list.append(post)
-                    else:
-                        continue
+        #need to change this to a while statement where while counter < len(p_list1) and counter < len(p_list2)
+        counter1 = 0
+        counter2 = 0
+        while counter1 < p_list1 and counter2 < p_list2:
+            if p_list1[counter1].doc_id == p_list2[counter2].doc_id:
+                post = Posting(p_list1[counter1].doc_id)
+                pp1 = []
+                pp2 = []
+                pp1 = p_list1[counter1].position
+                pp2 = p_list2[counter2].position
+                positions = self.position_compare(index,pp1,pp2,k)
+                counter1 += 1
+                counter2 += 1
+                if positions:   # if position_compare succeeds
+                    post.add_position(positions)
+                    new_posting_list.append(post)
+                else:
+                    continue
+                #### I'm not sure if .doc_id is ordered, so i need to test this
+            elif p_list1[counter1].doc_id < p_list2[counter2].doc_id:
+                counter1 += 1
+            else:
+                counter2 += 1
         return new_posting_list
 
     def __str__(self) -> str:

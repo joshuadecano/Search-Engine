@@ -1,6 +1,6 @@
 from pathlib import Path
 from documents import DocumentCorpus, DirectoryCorpus
-from indexing import Index, PositionalInvertedIndex
+from indexing import Index, PositionalInvertedIndex, diskindexwriter
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
 from queries import booleanqueryparser, querycomponent
@@ -46,10 +46,13 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = set()
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
+    diw = diskindexwriter.DiskIndexWriter()
     waitlist = []
     for c in corpus:    # c is an individual document in the corpus
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
-        doc_counter = 0
+        wdt_sum = 0
+        hashmap = {}    # key = term, value = counting occurence of term in document
+                        # hashmap will be empty after each document is processed
         dex = 0             # holds the position of each term
         for n in tokensz:   # n is the unprocessed token in list tokensz
             temp = n.lower()
@@ -57,6 +60,11 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                 itt = token_processor.process_token(n)
                 if itt is not None:
                     for s in itt:   # s is the processed token in list itt
+                        #if s == prev_term:
+                        if s in hashmap:
+                            hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
+                        else:
+                            hashmap[s] = 1      # if the term is not yet in the hashmap, set it to 1
                         vocabulary.add(s)
                         tdi.add_term(s, c.id, dex)
                         
@@ -69,7 +77,13 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                         # i could use len(tdi.hasheroni[term]) since tdi.hasheroni[term] should return a list of positions of the term in the doc
                         # actually maybe not since it actually holds a list of postings, maybe if i could access those postings and get the
                         # length of 
-
+        # this is after the document is done being indexed
+        for tftd in hashmap:
+            temp = (1 + np.log(tftd))
+            wdt_sum += temp**2
+        ld = math.sqrt(wdt_sum)
+        waitlist[c.id] = float(ld)
+    diw.write_index(tdi, corpus_path, waitlist)
     return tdi
 
 if __name__ == "__main__":
