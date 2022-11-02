@@ -102,7 +102,7 @@ if __name__ == "__main__":
             break
         query = input("Enter a query: ")
         stemmer = Porter2Stemmer()                                      # creates the stemmer object
-        if query[0] == '"' and query[-1] == '"':
+        if query[0] == '"' or query[-1] == '"':
             query = stem_this(query)
         fin_query = new_stem(query)
         print("Query after stemming:", query)                            # prints the final list of words which are stemmed

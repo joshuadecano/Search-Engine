@@ -37,5 +37,9 @@ class DiskPositionalIndex(Index):
             posting_list.append(post)
         return posting_list
     #def add_term(self, term : str, doc_id : int):
+
+    def get_positional_postings(self, term: str) -> Iterable[Posting]:
+        return super().get_positional_postings(term)
+        
     def vocabulary(self) -> Iterable[str]:
         return self.vocabulary
