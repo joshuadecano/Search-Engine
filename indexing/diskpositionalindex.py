@@ -10,6 +10,7 @@ class DiskPositionalIndex(Index):
         self.vocabulary = list(vocab)
         self.vocabulary.sort()
         self.corpus_size = corpus_size
+        self.path = open((deva_path + "/docWeights.bin"),"rb")
         #self.connection = sqlite3.connect("bytepositions.db") not sure if i need this
         self.path = open(deva_path,"rb")
     def get_postings(self, term : str) -> Iterable[Posting]:
@@ -40,6 +41,6 @@ class DiskPositionalIndex(Index):
 
     def get_positional_postings(self, term: str) -> Iterable[Posting]:
         return super().get_positional_postings(term)
-        
+
     def vocabulary(self) -> Iterable[str]:
         return self.vocabulary

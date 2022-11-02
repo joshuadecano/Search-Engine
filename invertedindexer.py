@@ -1,6 +1,7 @@
 from pathlib import Path
 from documents import DocumentCorpus, DirectoryCorpus
 from indexing import Index, PositionalInvertedIndex, diskindexwriter
+from indexing.diskpositionalindex import DiskPositionalIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
 from queries import booleanqueryparser, querycomponent
@@ -87,14 +88,29 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     return tdi
 
 if __name__ == "__main__":
-    user_path = input("Enter corpus path: ")
-    corpus_path = Path(user_path)
-    start = time.time()
-    #corpus_path = Path()
-    d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-    index = index_corpus(d)
-    stop = time.time()
-    print("Indexing took", stop-start, "seconds")
+    print("1. Build Index")
+    print("2. Query Index")
+    newq = ""
+    newq = input("")
+    handled = False
+    while handled == False:
+        if newq == "1":     # indexes corpus to RAM and then writes it to disk
+            user_path = input("Enter corpus path: ")
+            corpus_path = Path(user_path)
+            start = time.time()
+            d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+            index = index_corpus(d)
+            handled = True
+        if newq == "2":
+            dpi = DiskPositionalIndex(corpus_path, index.vocabulary(), d.__len__())
+
+    #user_path = input("Enter corpus path: ")
+    #corpus_path = Path(user_path)
+    #start = time.time()
+    #d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+    #index = index_corpus(d)
+    #stop = time.time()
+    #print("Indexing took", stop-start, "seconds")
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
     while query != ":q":
