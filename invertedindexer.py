@@ -6,6 +6,7 @@ from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
 from queries import booleanqueryparser, querycomponent
 import re
+import os
 import time
 import math
 import numpy as np
@@ -88,10 +89,10 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     return tdi
 
 if __name__ == "__main__":
-    print("1. Build Index")
-    print("2. Query Index")
+    print("1. Build index.")
+    print("2. Query index.")
     newq = ""
-    newq = input("")
+    index_question = input("")
     handled = False
     while handled == False:
         if newq == "1":     # indexes corpus to RAM and then writes it to disk
@@ -102,7 +103,22 @@ if __name__ == "__main__":
             index = index_corpus(d)
             handled = True
         if newq == "2":
-            dpi = DiskPositionalIndex(corpus_path, index.vocabulary(), d.__len__())
+            user_path = input("Enter corpus path: ")
+            corpus_path = Path(user_path)
+            test_path = corpus_path + "/postings.bin"   # this checks to see if the current corpus path has already been indexed
+            if os.path.exists(test_path) == False:
+                dpi = DiskPositionalIndex(corpus_path)
+                handled = True
+            else:
+                print("This directory has does not contain a corpus")
+                print("boutta build one for u though")
+                d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+                index = index_corpus(d)
+                handled = True
+    print("1. Boolean retrieval.")
+    print("2. Ranked retrieval.")
+    retrieval_question = input("")
+            
 
     #user_path = input("Enter corpus path: ")
     #corpus_path = Path(user_path)
@@ -113,7 +129,7 @@ if __name__ == "__main__":
     #print("Indexing took", stop-start, "seconds")
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
-    while query != ":q":
+    while query != ":q" and retrieval_question == 1:
         if query == ":q":
             break
         query = input("Enter a query: ")
@@ -166,3 +182,5 @@ if __name__ == "__main__":
                         print("Invalid input")
         else:
             print("no results")
+    while query != ":q" and retrieval_question == 2:
+        print("okay need to do this now")

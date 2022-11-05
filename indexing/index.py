@@ -11,7 +11,7 @@ class Index(ABC):
         """Retrieves a sequence of Postings of documents that contain the given term."""
         pass
 
-    def get_positional_postings(self, term : str) -> Iterable[Posting]:
+    def get_no_postings(self, term : str) -> Iterable[Posting]:
         pass
     
     def vocabulary(self) -> list[str]:
