@@ -15,8 +15,8 @@ class DiskPositionalIndex(Index):
         #self.path = open(deva_path,"rb")
         self.path = deva_path   # not sure which one i should use yet need to run it
     def get_postings(self, term : str) -> Iterable[Posting]:
-        connection = sqlite3.connect(self.path + "/bytepositions.db")
-        preta_path = self.path + "/postings.bin" # moves the path to the postings file
+        connection = sqlite3.connect(self.path / "bytepositions.db")
+        preta_path = self.path / "postings.bin" # moves the path to the postings file
         cursor = connection.cursor()
         target_byte = cursor.execute("SELECT position FROM bytes WHERE terms = (?)", term)
         preta_path.seek(target_byte) # seek to the target_byte given by the query
@@ -42,9 +42,9 @@ class DiskPositionalIndex(Index):
     #def add_term(self, term : str, doc_id : int):
 
     def get_no_postings(self, term: str) -> Iterable[Posting]:
-        connection = sqlite3.connect(self.path + "/bytepositions.db")
+        connection = sqlite3.connect(self.path / "bytepositions.db")
         cursor = connection.cursor()
-        preta_path = self.path + "/postings.bin" # moves the path to the postings file
+        preta_path = self.path / "postings.bin" # moves the path to the postings file
         target_byte = cursor.execute("SELECT position FROM bytes WHERE terms = (?)", term)
         preta_path.seek(target_byte) # seek to the target_byte given by the query
         posting_list = [None] * size # posting list we will return

@@ -62,6 +62,7 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                 itt = token_processor.process_token(n)
                 if itt is not None:
                     for s in itt:   # s is the processed token in list itt
+                        #print(s)
                         #if s == prev_term:
                         if s in hashmap:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
@@ -80,29 +81,31 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                         # actually maybe not since it actually holds a list of postings, maybe if i could access those postings and get the
                         # length of 
         # this is after the document is done being indexed
-        for tftd in hashmap:
+        for tftd in hashmap.values():
             temp = (1 + np.log(tftd))
             wdt_sum += temp**2
         ld = math.sqrt(wdt_sum)
-        waitlist[c.id] = float(ld)
+        #print(ld)
+        #print(c.id)
+        waitlist.append(float(ld))
     diw.write_index(tdi, corpus_path, waitlist)
     return tdi
 
 if __name__ == "__main__":
     print("1. Build index.")
     print("2. Query index.")
-    newq = ""
+    #newq = ""
     index_question = input("")
     handled = False
     while handled == False:
-        if newq == "1":     # indexes corpus to RAM and then writes it to disk
+        if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
             handled = True
-        if newq == "2":
+        if index_question == "2":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             test_path = corpus_path + "/postings.bin"   # this checks to see if the current corpus path has already been indexed
