@@ -50,7 +50,9 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
     diw = diskindexwriter.DiskIndexWriter()
     waitlist = []
+    count = 1
     for c in corpus:    # c is an individual document in the corpus
+        count+=1
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         wdt_sum = 0
         hashmap = {}    # key = term, value = counting occurence of term in document

@@ -1,3 +1,5 @@
 
 docWeights.bin
 postings.bin
+postings.bin
+bytepositions.db
