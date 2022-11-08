@@ -10,7 +10,8 @@ class PositionalInvertedIndex(Index):
     def __init__(self, vocab : Iterable[str], corpus_size : int):
         """Constructs an empty index using the given vocabulary and corpus size."""
         self.hasheroni = {}
-        self.vocabular = vocab
+        self.vocabular = list(vocab)
+        #self.vocabular.sort()
         self.corpus_size = corpus_size
         #self.term_count = {}
 

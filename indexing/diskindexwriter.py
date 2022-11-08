@@ -16,12 +16,20 @@ class DiskIndexWriter(Index):
         cursor = connection.cursor()
         cursor.execute("DROP TABLE IF EXISTS bytes")
         cursor.execute("CREATE TABLE bytes (terms TEXT, position INTEGER)")
+        print("vocab word to search: ", vocab[7])
         print(len(vocab))
+        count = 1
         for s in vocab: #for each term in vocab
+            prev_docid = 0
+            if count == 7:
+                print("byte location: ", f.tell())
+                print("term: ", s)
+                count +=1
+            else:
+                count +=1
             post = pi.get_postings(s)   # get postings list for each term
             position = f.tell() # DFT
             f.write(struct.pack('i', len(post)))    #dft
-            prev_docid = 0  
             for t in post:  # for each posting with term s
                 f.write(struct.pack('i', (t.doc_id - prev_docid)))  #id
                 f.write(struct.pack('i', len(t.position)))  #tftd
@@ -39,7 +47,7 @@ class DiskIndexWriter(Index):
             terms = s
             #position = f.tell()
             inputs = (terms, position)
-            f.seek(0,2) #move the file pointer to the end of a file
+            #f.seek(0,2) #move the file pointer to the end of a file
             add_byte_position = ("INSERT INTO bytes "
                                 "(terms, position) "    # previous said %(term)s , %(position)s below 
                                 "VALUES (?, ?)") #, (terms, position))

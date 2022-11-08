@@ -23,9 +23,9 @@ class DiskPositionalIndex(Index):
         target_byte = cursor.fetchone()
         #print(target_byte)
         f.seek(target_byte[0]) # seek to the target_byte given by the query
-        asc = f.read(4)
+        #asc = f.read(4)
         #print(asc)
-        size = struct.unpack('i', asc)[0]   # DFt document frequency
+        size = struct.unpack('i', f.read(4))[0]   # DFt document frequency
         #print(size)
 
         #posting_list = [None] * size # posting list we will return
@@ -35,6 +35,7 @@ class DiskPositionalIndex(Index):
             #f.seek(4,1) # seek to doc_id
             doc_id = struct.unpack('i', f.read(4))[0] #doc_id
             post = Posting(doc_id + prev_docid) #create a posting with the doc_id
+            print(doc_id+prev_docid)
             prev_docid = doc_id
             #f.seek(4,1) # seek to tftd (number of positions)
             position_count = struct.unpack('i', f.read(4))[0]
@@ -58,10 +59,10 @@ class DiskPositionalIndex(Index):
         target_byte = cursor.execute("SELECT position FROM bytes WHERE terms = (?)", term)
         preta_path.seek(target_byte) # seek to the target_byte given by the query
         posting_list = [None] * size # posting list we will return
-        size = int(preta_path.read(1))   # DFt
+        size = int(preta_path.read(4))   # DFt
         prev_docid = 0
         for s in size:  # for each doc containing the term
-            preta_path.seek(1,1) # seek to doc_id
+            #preta_path.seek(1,1) # seek to doc_id
             doc_id = struct.unpack('i', f.read(4))[0] #doc_id
             post = Posting(doc_id + prev_docid) #create a posting with the doc_id
             prev_docid = doc_id

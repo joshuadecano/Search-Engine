@@ -46,7 +46,7 @@ def new_stem(firstphrase : str) -> str:
 def index_corpus(corpus : DocumentCorpus) -> Index:
     whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
-    vocabulary = set()
+    vocabulary = []
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
     diw = diskindexwriter.DiskIndexWriter()
     waitlist = []
@@ -64,11 +64,12 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                     for s in itt:   # s is the processed token in list itt
                         #print(s)
                         #if s == prev_term:
+                        if s not in tdi.vocabular:
+                            tdi.vocabular.append(s)
                         if s in hashmap:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
                         else:
                             hashmap[s] = 1      # if the term is not yet in the hashmap, set it to 1
-                        vocabulary.add(s)
                         tdi.add_term(s, c.id, dex)
                         
                         dex += 1        # increments by 1 for every token passed in to add_term
@@ -88,6 +89,8 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         #print(ld)
         #print(c.id)
         waitlist.append(float(ld))
+    tdi.vocabular.sort()
+    print(tdi.vocabulary()[7])
     diw.write_index(tdi, corpus_path, waitlist)
     return tdi
 
@@ -97,12 +100,12 @@ if __name__ == "__main__":
     #newq = ""
     index_question = input("")
     handled = False
-    start = time.time()
+    #start = time.time()
     while handled == False:
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
-            start = time.time()
+            #start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
             handled = True
