@@ -19,7 +19,7 @@ class DiskIndexWriter(Index):
         print(len(vocab))
         for s in vocab: #for each term in vocab
             post = pi.get_postings(s)   # get postings list for each term
-            position = f.tell()
+            position = f.tell() # DFT
             f.write(struct.pack('i', len(post)))    #dft
             prev_docid = 0  
             for t in post:  # for each posting with term s

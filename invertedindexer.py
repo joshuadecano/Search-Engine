@@ -109,14 +109,42 @@ if __name__ == "__main__":
         if index_question == "2":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
-            test_path = corpus_path / "/postings.bin"   # this checks to see if the current corpus path has already been indexed
-            print(test_path)
-            if os.path.exists(test_path) == False:
+            test_path = corpus_path / "postings.bin"   # this checks to see if the current corpus path has already been indexed
+            
+            
+            if os.path.exists(test_path) == True:
                 print("NICE SOMETHING WORKED")
+                print(corpus_path)
+                d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+                print(len(d.documents()))
                 dpi = DiskPositionalIndex(corpus_path)      # i can probably move this out of this while loop since dpi only requires the path and the index should be built already
-                tessstt = dpi.get_postings("floral")
-                for l in tessstt:
-                    print(l)
+                print("here now")
+                big_book = dpi.get_postings("moos")         # returns a list of postings
+                if big_book is None:
+                    print("Term not found")
+                else:
+                    count = 1
+                    print(len(big_book))
+                    #print(big_book)
+                    for s in big_book:
+                        #print(s.doc_id)
+                        print("Document #", count, d.get_document((s.doc_id)))
+                        count += 1
+                    #print(len(big_book), "Documents found containing", query)
+                    
+                    answer = 1
+                    while answer != 0:
+                        try:
+                            answer = int(input("To view a document, enter the Document #, else enter '0'\n"))
+                            if answer == 0:
+                                continue
+                            if int(answer) <= len(big_book):
+                                print("Title:", d.get_document(big_book[answer-1].doc_id).title)
+                                print(d.get_document(big_book[answer-1].doc_id).get_content().getvalue())
+                            else:
+                                print("Invalid selection")
+                        except:
+                            print("Invalid input")
                 handled = True
             else:
                 print("This directory has does not contain a corpus")
