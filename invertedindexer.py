@@ -97,6 +97,7 @@ if __name__ == "__main__":
     #newq = ""
     index_question = input("")
     handled = False
+    start = time.time()
     while handled == False:
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
@@ -108,16 +109,27 @@ if __name__ == "__main__":
         if index_question == "2":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
-            test_path = corpus_path + "/postings.bin"   # this checks to see if the current corpus path has already been indexed
+            test_path = corpus_path / "/postings.bin"   # this checks to see if the current corpus path has already been indexed
+            print(test_path)
             if os.path.exists(test_path) == False:
-                dpi = DiskPositionalIndex(corpus_path)
+                print("NICE SOMETHING WORKED")
+                dpi = DiskPositionalIndex(corpus_path)      # i can probably move this out of this while loop since dpi only requires the path and the index should be built already
+                tessstt = dpi.get_postings("floral")
+                for l in tessstt:
+                    print(l)
                 handled = True
             else:
                 print("This directory has does not contain a corpus")
                 print("boutta build one for u though")
                 d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+                stop = time.time()
+                print("Indexing took", stop-start, "seconds")
+                start = time.time()
                 index = index_corpus(d)
+                stop = time.time()
+                print("Time writing to disk:", stop - start, "seconds")
                 handled = True
+    
     print("1. Boolean retrieval.")
     print("2. Ranked retrieval.")
     retrieval_question = input("")
@@ -130,7 +142,7 @@ if __name__ == "__main__":
     #index = index_corpus(d)
     #stop = time.time()
     #print("Indexing took", stop-start, "seconds")
-    query = ""
+    query = input("")
     bqparser = booleanqueryparser.BooleanQueryParser()
     while query != ":q" and retrieval_question == 1:
         if query == ":q":
