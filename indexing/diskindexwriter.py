@@ -7,12 +7,13 @@ import os
 class DiskIndexWriter(Index):
     def write_index(self, pi : PositionalInvertedIndex, deva_path : Path, weights : list[float]):
         asura_path = deva_path / "postings.bin"
-        os.remove(asura_path)
+        if os.path.exists(asura_path) == True:
+            os.remove(asura_path)
         f = open(asura_path,"wb")
         vocab = pi.vocabulary()
         connection = sqlite3.connect("bytepositions.db")
-        connection.close()
-        connection = sqlite3.connect("bytepositions.db")
+        #connection.close()
+        #connection = sqlite3.connect("bytepositions.db")
         cursor = connection.cursor()
         cursor.execute("DROP TABLE IF EXISTS bytes")
         cursor.execute("CREATE TABLE bytes (terms TEXT, position INTEGER)")

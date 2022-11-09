@@ -26,16 +26,16 @@ class ProTokenProcessor(TokenProcessor):
                 break
         if token == "":
             return None
-        re.sub("'","", token)    # removes apostrophes
-        re.sub('"',"",token)     # removes quotation marks
-        if '-' in token:
-            for t in token.split("-"):
+        atoken = re.sub("'","", token)    # removes apostrophes
+        qtoken = re.sub('"',"",atoken)     # removes quotation marks
+        if '-' in qtoken:
+            for t in qtoken.split("-"):
                 tok = t.strip()
                 if len(tok) > 0:
                     stemd = stemmer.stem(tok)
                     final_return.append(stemd)
-        token.lower()
-        stemd = stemmer.stem(token)
+        #ltoken = token.lower()
+        stemd = stemmer.stem(qtoken)
         final_return.append(stemd)
         #except:
         #    nothings = 0

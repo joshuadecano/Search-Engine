@@ -15,7 +15,7 @@ class DiskPositionalIndex(Index):
         #self.path = open(deva_path,"rb")
         self.path = deva_path   # not sure which one i should use yet need to run it
     def get_postings(self, term : str) -> Iterable[Posting]:
-        connection = sqlite3.connect(self.path / "bytepositions.db")
+        connection = sqlite3.connect("bytepositions.db")
         preta_path = self.path / "postings.bin" # moves the path to the postings file
         f = open(preta_path,"rb")
         cursor = connection.cursor()

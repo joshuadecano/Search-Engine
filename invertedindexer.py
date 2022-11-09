@@ -61,7 +61,7 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         for n in tokensz:   # n is the unprocessed token in list tokensz
             temp = n.lower()
             if len(temp) != 0:
-                itt = token_processor.process_token(n)
+                itt = token_processor.process_token(temp)
                 if itt is not None:
                     for s in itt:   # s is the processed token in list itt
                         #print(s)
@@ -72,6 +72,7 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
                         else:
                             hashmap[s] = 1      # if the term is not yet in the hashmap, set it to 1
+                        #print(s)
                         tdi.add_term(s, c.id, dex)
                         
                         dex += 1        # increments by 1 for every token passed in to add_term
@@ -93,6 +94,7 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         waitlist.append(float(ld))
     tdi.vocabular.sort()
     print(tdi.vocabulary()[7])
+    print("corpus path: " , corpus_path)
     diw.write_index(tdi, corpus_path, waitlist)
     return tdi
 
@@ -102,7 +104,7 @@ if __name__ == "__main__":
     #newq = ""
     index_question = input("")
     handled = False
-    #start = time.time()
+    start = time.time()
     while handled == False:
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
@@ -110,6 +112,8 @@ if __name__ == "__main__":
             #start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
+            stop = time.time()
+            print("time it took to index: ", stop - start)
             handled = True
         if index_question == "2":
             user_path = input("Enter corpus path: ")
@@ -124,7 +128,7 @@ if __name__ == "__main__":
                 print(len(d.documents()))
                 dpi = DiskPositionalIndex(corpus_path)      # i can probably move this out of this while loop since dpi only requires the path and the index should be built already
                 print("here now")
-                big_book = dpi.get_postings("moos")         # returns a list of postings
+                big_book = dpi.get_postings("hope")         # returns a list of postings
                 if big_book is None:
                     print("Term not found")
                 else:
