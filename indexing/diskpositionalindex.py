@@ -23,20 +23,24 @@ class DiskPositionalIndex(Index):
         target_byte = cursor.fetchone()
         #print(target_byte)
         f.seek(target_byte[0]) # seek to the target_byte given by the query
+        print("dft: ",target_byte[0])
         #asc = f.read(4)
         #print(asc)
         size = struct.unpack('i', f.read(4))[0]   # DFt document frequency
-        #print(size)
-
+        print(size)
+        
         #posting_list = [None] * size # posting list we will return
         posting_list = []
         prev_docid = 0
         for s in range(size):  # for each doc containing the term
             #f.seek(4,1) # seek to doc_id
+            #prev_docid = 0
+            print("doc: ", f.tell())
             doc_id = struct.unpack('i', f.read(4))[0] #doc_id
             post = Posting(doc_id + prev_docid) #create a posting with the doc_id
             print(doc_id+prev_docid)
-            prev_docid = doc_id
+            prev_docid += doc_id
+            print("tftd: ", f.tell())
             #f.seek(4,1) # seek to tftd (number of positions)
             position_count = struct.unpack('i', f.read(4))[0]
             #print(position_count)
@@ -44,9 +48,10 @@ class DiskPositionalIndex(Index):
             for t in range(position_count):
                 #f.seek(4,1) # seek to pi, (position of term in doc_id)
                 #print(f.tell())
+                print("pi: ", f.tell())
                 position = struct.unpack('i', f.read(4))[0]
                 post.add_position(position + prev_position)
-                prev_position = position
+                prev_position += position
             posting_list.append(post)
         return posting_list
     #def add_term(self, term : str, doc_id : int):

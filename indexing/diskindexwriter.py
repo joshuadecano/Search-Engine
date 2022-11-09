@@ -19,7 +19,7 @@ class DiskIndexWriter(Index):
         cursor.execute("CREATE TABLE bytes (terms TEXT, position INTEGER)")
         print("vocab word to search: ", vocab[7])
         print(len(vocab))
-        count = 1
+        count = 0
         for s in vocab: #for each term in vocab
             prev_docid = 0
             if count == 7:
@@ -29,14 +29,21 @@ class DiskIndexWriter(Index):
             else:
                 count +=1
             post = pi.get_postings(s)   # get postings list for each term
+            
             position = f.tell() # DFT
+            #print("dft: ",position)
             f.write(struct.pack('i', len(post)))    #dft
             for t in post:  # for each posting with term s
+                #print("current doc id: ", t.doc_id)
+                #print("previous doc id: ", prev_docid)
+                #print("id: ", f.tell())
                 f.write(struct.pack('i', (t.doc_id - prev_docid)))  #id
+                #print("tftd: ", f.tell())
                 f.write(struct.pack('i', len(t.position)))  #tftd
                 prev_docid = t.doc_id        # stores the current doc_id for the gap
                 prev_position = 0
                 for u in t.position:
+                    #print("pi: ", f.tell())
                     f.write(struct.pack('i', (u - prev_position)))  #pi
                     prev_position = u   # stores the current position for the gap
             #f.seek(len(post))   

@@ -70,20 +70,14 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                             tdi.vocabular.append(s)
                         if s in hashmap:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
+                            #tdi.hasheroni[s][-1].add_position(dex)
                         else:
                             hashmap[s] = 1      # if the term is not yet in the hashmap, set it to 1
+                            #tdi.add_term(s, c.id, dex)
                         #print(s)
                         tdi.add_term(s, c.id, dex)
                         
                         dex += 1        # increments by 1 for every token passed in to add_term
-
-                        # note: i will call the diskindexwriter somewhere here, where i should be passing in the calculated weight to
-                        # be added to the file docWeights.bin
-                        # things we will need to know here
-                        # tftd
-                        # i could use len(tdi.hasheroni[term]) since tdi.hasheroni[term] should return a list of positions of the term in the doc
-                        # actually maybe not since it actually holds a list of postings, maybe if i could access those postings and get the
-                        # length of 
         # this is after the document is done being indexed
         for tftd in hashmap.values():
             temp = (1 + np.log(tftd))
@@ -128,7 +122,7 @@ if __name__ == "__main__":
                 print(len(d.documents()))
                 dpi = DiskPositionalIndex(corpus_path)      # i can probably move this out of this while loop since dpi only requires the path and the index should be built already
                 print("here now")
-                big_book = dpi.get_postings("hope")         # returns a list of postings
+                big_book = dpi.get_postings("histor")         # returns a list of postings
                 if big_book is None:
                     print("Term not found")
                 else:

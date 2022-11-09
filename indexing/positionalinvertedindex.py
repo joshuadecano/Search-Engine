@@ -11,7 +11,6 @@ class PositionalInvertedIndex(Index):
         """Constructs an empty index using the given vocabulary and corpus size."""
         self.hasheroni = {}
         self.vocabular = list(vocab)
-        #self.vocabular.sort()
         self.corpus_size = corpus_size
         #self.term_count = {}
 
@@ -29,8 +28,6 @@ class PositionalInvertedIndex(Index):
         else:
             post.add_position(position)
             self.hasheroni[term] = [post]
-
-        
     def get_postings(self, term : str) -> Iterable[Posting]:
         """Returns a list of Postings for all documents that contain the given term."""
         if term in self.hasheroni:
