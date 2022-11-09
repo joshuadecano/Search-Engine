@@ -98,12 +98,13 @@ if __name__ == "__main__":
     #newq = ""
     index_question = input("")
     handled = False
-    start = time.time()
+    corpus_path = ""
+
     while handled == False:
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
-            #start = time.time()
+            start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
             stop = time.time()
@@ -113,28 +114,60 @@ if __name__ == "__main__":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             test_path = corpus_path / "postings.bin"   # this checks to see if the current corpus path has already been indexed
-            
-            
             if os.path.exists(test_path) == True:
                 print("NICE SOMETHING WORKED")
                 print(corpus_path)
-                d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-                print(len(d.documents()))
-                dpi = DiskPositionalIndex(corpus_path)      # i can probably move this out of this while loop since dpi only requires the path and the index should be built already
                 print("here now")
-                big_book = dpi.get_postings("histor")         # returns a list of postings
+            handled = True
+    d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+    print(len(d.documents()))
+    dpi = DiskPositionalIndex(corpus_path)
+    print(type(corpus_path))
+    print("1. Boolean retrieval.")
+    print("2. Ranked retrieval.")
+    retrieval_question = input("")
+
+    # Begin retrieval
+    #query = input("Enter a query")
+    query = ""
+    bqparser = booleanqueryparser.BooleanQueryParser()
+    if retrieval_question == "1":
+        while query != ":q":
+            query = input("Enter a query: ")
+            stemmer = Porter2Stemmer()                                      # creates the stemmer object
+            if query[0] == '"' or query[-1] == '"':
+                query = stem_this(query)
+            fin_query = new_stem(query)
+            print("Query after stemming:", query)                            # prints the final list of words which are stemmed
+            book = bqparser.parse_query(fin_query)          # this will return a query component, basically holds a list of postings
+            if query.startswith(':stem'):
+                token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
+                token = ' '.join(query.split()[1:])
+                print(stemmer.stem(token))
+                continue
+            if query.startswith(':index'):
+                #token_processor = protokenprocessor.ProTokenProcessor()
+                newpath = query.split()[1:]
+                print(newpath)
+                corpus_path = Path(newpath)
+                d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
+                continue
+            if query.startswith(':vocab'):
+                testss = sorted(index.vocabulary())
+                for i in range(1000):
+                    print(testss[i])
+                print(f"Total number of vocabulary terms: {len(testss)}")
+                continue
+            if book is not None:                            # if there are no query results
+                big_book = book.get_postings(dpi)         # returns a list of postings
                 if big_book is None:
                     print("Term not found")
                 else:
                     count = 1
-                    print(len(big_book))
-                    #print(big_book)
                     for s in big_book:
-                        #print(s.doc_id)
                         print("Document #", count, d.get_document((s.doc_id)))
                         count += 1
-                    #print(len(big_book), "Documents found containing", query)
-                    
+                    print(len(big_book), "Documents found containing", query)
                     answer = 1
                     while answer != 0:
                         try:
@@ -148,85 +181,16 @@ if __name__ == "__main__":
                                 print("Invalid selection")
                         except:
                             print("Invalid input")
-                handled = True
+            if query == ":q":
+                break
             else:
-                print("This directory has does not contain a corpus")
-                print("boutta build one for u though")
-                d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-                stop = time.time()
-                print("Indexing took", stop-start, "seconds")
-                start = time.time()
-                index = index_corpus(d)
-                stop = time.time()
-                print("Time writing to disk:", stop - start, "seconds")
-                handled = True
-    
-    print("1. Boolean retrieval.")
-    print("2. Ranked retrieval.")
-    retrieval_question = input("")
-            
-
-    #user_path = input("Enter corpus path: ")
-    #corpus_path = Path(user_path)
-    #start = time.time()
-    #d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-    #index = index_corpus(d)
-    #stop = time.time()
-    #print("Indexing took", stop-start, "seconds")
-    query = input("")
-    bqparser = booleanqueryparser.BooleanQueryParser()
-    while query != ":q" and retrieval_question == 1:
-        if query == ":q":
-            break
-        query = input("Enter a query: ")
-        stemmer = Porter2Stemmer()                                      # creates the stemmer object
-        if query[0] == '"' or query[-1] == '"':
-            query = stem_this(query)
-        fin_query = new_stem(query)
-        print("Query after stemming:", query)                            # prints the final list of words which are stemmed
-        book = bqparser.parse_query(fin_query)          # this will return a query component, basically holds a list of postings
-        if query.startswith(':stem'):
-            token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
-            token = ' '.join(query.split()[1:])
-            print(stemmer.stem(token))
-            continue
-        if query.startswith(':index'):
-            #token_processor = protokenprocessor.ProTokenProcessor()
-            newpath = query.split()[1:]
-            print(newpath)
-            corpus_path = Path(newpath)
-            d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-            continue
-        if query.startswith(':vocab'):
-            testss = sorted(index.vocabulary())
-            for i in range(1000):
-                print(testss[i])
-            print(f"Total number of vocabulary terms: {len(testss)}")
-            continue
-        if book is not None:                            # if there are no query results
-            big_book = book.get_postings(index)         # returns a list of postings
-            if big_book is None:
-                print("Term not found")
-            else:
-                count = 1
-                for s in big_book:
-                    print("Document #", count, d.get_document((s.doc_id)))
-                    count += 1
-                print(len(big_book), "Documents found containing", query)
-                answer = 1
-                while answer != 0:
-                    try:
-                        answer = int(input("To view a document, enter the Document #, else enter '0'\n"))
-                        if answer == 0:
-                            continue
-                        if int(answer) <= len(big_book):
-                            print("Title:", d.get_document(big_book[answer-1].doc_id).title)
-                            print(d.get_document(big_book[answer-1].doc_id).get_content().getvalue())
-                        else:
-                            print("Invalid selection")
-                    except:
-                        print("Invalid input")
-        else:
-            print("no results")
-    while query != ":q" and retrieval_question == 2:
+                print("no results")
+    if retrieval_question == 2:
         print("okay need to do this now")
+        while query != ":q":
+            query = input("Enter a query: ")
+            stemmer = Porter2Stemmer()                                      # creates the stemmer object
+            if query[0] == '"' or query[-1] == '"':
+                query = stem_this(query)
+            fin_query = new_stem(query)
+            print("Query after stemming:", query)

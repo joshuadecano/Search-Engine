@@ -14,6 +14,7 @@ class PhraseLiteral(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         answer = []
+        print(self.terms)
         answer = index.get_postings(self.terms[0])
         comparisons = len(self.terms) - 1        # amount of comparisons we will need
 
@@ -40,7 +41,7 @@ class PhraseLiteral(QueryComponent):
         #need to change this to a while statement where while counter < len(p_list1) and counter < len(p_list2)
         counter1 = 0
         counter2 = 0
-        while counter1 < p_list1 and counter2 < p_list2:
+        while counter1 < len(p_list1) and counter2 < len(p_list2):
             if p_list1[counter1].doc_id == p_list2[counter2].doc_id:
                 post = Posting(p_list1[counter1].doc_id)
                 pp1 = []

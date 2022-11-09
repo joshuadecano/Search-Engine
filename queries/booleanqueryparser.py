@@ -68,15 +68,15 @@ class BooleanQueryParser:
             end_quote = subquery.find('"', start_index)
             if end_quote < 0:
                 length_out = sub_length - start_quote
-            print(subquery[start_index:end_quote])
+            #print(subquery[start_index:end_quote])
             # changed start_quote to start_index below, since it would add the first quote to the list.
             # 
             for t in subquery[start_index:end_quote].split(" "):
                 tok = t.strip()
                 if len(tok) > 0:
                     phrase.append(tok)
-            print("phrase: ",phrase)
-            print(start_quote, " and " , end_quote)
+            #print("phrase: ",phrase)
+            #print(start_quote, " and " , end_quote)
             next_space = subquery.find(' ', start_index)
             return BooleanQueryParser._Literal(
                 BooleanQueryParser._StringBounds(start_quote, end_quote + 1),
@@ -92,10 +92,10 @@ class BooleanQueryParser:
             length_out = sub_length - start_index
         else:
             length_out = next_space - start_index
-        print("sub_length: ", sub_length)
-        print("next_space: ", next_space)
-        print("start index: ", start_index)
-        print("length out: ", length_out)
+        #print("sub_length: ", sub_length)
+        #print("next_space: ", next_space)
+        #print("start index: ", start_index)
+        #print("length out: ", length_out)
         # This is a term literal containing a single term.
         return BooleanQueryParser._Literal(
             BooleanQueryParser._StringBounds(start_index, length_out),
