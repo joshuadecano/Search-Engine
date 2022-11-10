@@ -224,7 +224,14 @@ if __name__ == "__main__":
                 d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
                 continue
             if query.startswith(':vocab'):
-                testss = sorted(index.vocabulary())
+                connection = sqlite3.connect("bytepositions.db")
+                #sixth_path = corpus_path / "postings.bin"
+                #f = open(sixth_path,"rb")
+                cursor = connection.cursor()
+                testss = dpi.vocabulary()
+                cursor.execute("SELECT terms FROM bytes")
+                testss = cursor.fetchall()
+                print(len(testss))
                 for i in range(1000):
                     print(testss[i])
                 print(f"Total number of vocabulary terms: {len(testss)}")

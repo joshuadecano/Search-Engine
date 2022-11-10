@@ -14,7 +14,7 @@ class PhraseLiteral(QueryComponent):
 
     def get_postings(self, index : Index) -> list[Posting]:
         answer = []
-        print(self.terms)
+        #print(self.terms)
         answer = index.get_postings(self.terms[0])
         comparisons = len(self.terms) - 1        # amount of comparisons we will need
 

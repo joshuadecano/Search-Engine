@@ -14,6 +14,7 @@ class DiskPositionalIndex(Index):
         #self.connection = sqlite3.connect("bytepositions.db") not sure if i need this
         #self.path = open(deva_path,"rb")
         self.path = deva_path
+        self.vocabular = []
 
     def get_postings(self, term : str) -> Iterable[Posting]:
         connection = sqlite3.connect("bytepositions.db")
@@ -31,7 +32,8 @@ class DiskPositionalIndex(Index):
         #print(asc)
         size = struct.unpack('i', f.read(4))[0]   # DFt document frequency
         #print(size)
-        
+        if term not in self.vocabular:
+            self.vocabular.append(term)
         #posting_list = [None] * size # posting list we will return
         posting_list = []
         prev_docid = 0
@@ -83,4 +85,4 @@ class DiskPositionalIndex(Index):
         return posting_list
 
     def vocabulary(self) -> Iterable[str]:
-        return self.vocabulary
+        return self.vocabular
