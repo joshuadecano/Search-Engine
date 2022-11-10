@@ -13,7 +13,8 @@ class DiskPositionalIndex(Index):
         #self.path = open((deva_path + "/docWeights.bin"),"rb")
         #self.connection = sqlite3.connect("bytepositions.db") not sure if i need this
         #self.path = open(deva_path,"rb")
-        self.path = deva_path   # not sure which one i should use yet need to run it
+        self.path = deva_path
+
     def get_postings(self, term : str) -> Iterable[Posting]:
         connection = sqlite3.connect("bytepositions.db")
         preta_path = self.path / "postings.bin" # moves the path to the postings file
@@ -29,7 +30,7 @@ class DiskPositionalIndex(Index):
         #asc = f.read(4)
         #print(asc)
         size = struct.unpack('i', f.read(4))[0]   # DFt document frequency
-        print(size)
+        #print(size)
         
         #posting_list = [None] * size # posting list we will return
         posting_list = []
@@ -54,6 +55,7 @@ class DiskPositionalIndex(Index):
                 position = struct.unpack('i', f.read(4))[0]
                 post.add_position(position + prev_position)
                 prev_position += position
+            post.dft = size
             posting_list.append(post)
         return posting_list
     #def add_term(self, term : str, doc_id : int):
@@ -63,17 +65,21 @@ class DiskPositionalIndex(Index):
         cursor = connection.cursor()
         preta_path = self.path / "postings.bin" # moves the path to the postings file
         f = open(preta_path,"rb")
-        target_byte = cursor.execute("SELECT position FROM bytes WHERE terms = (?)", term)
-        preta_path.seek(target_byte) # seek to the target_byte given by the query
-        posting_list = [None] * size # posting list we will return
-        size = int(preta_path.read(4))   # DFt
+        cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
+        target_byte = cursor.fetchone()
+        f.seek(target_byte[0]) # seek to the target_byte given by the query
+        posting_list = [] # posting list we will return
+        size = struct.unpack('i', f.read(4))[0]   # DFt
+        #print(size)
         prev_docid = 0
-        for s in size:  # for each doc containing the term
+        for s in range(size):  # for each doc containing the term
             #preta_path.seek(1,1) # seek to doc_id
             doc_id = struct.unpack('i', f.read(4))[0] #doc_id
             post = Posting(doc_id + prev_docid) #create a posting with the doc_id
-            prev_docid = doc_id
+            prev_docid += doc_id
             posting_list.append(post)
+            tftd = struct.unpack('i', f.read(4))[0]       # tftd, using it to jump this many bytes ahead
+            f.seek(tftd * 4,1)
         return posting_list
 
     def vocabulary(self) -> Iterable[str]:

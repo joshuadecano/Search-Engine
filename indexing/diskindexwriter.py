@@ -1,5 +1,6 @@
 from indexing import Index, PositionalInvertedIndex
 from pathlib import Path
+from bplustree import BPlusTree
 import struct
 import sqlite3
 import os

@@ -26,6 +26,7 @@ class PositionalInvertedIndex(Index):
                 post.add_position(position)
                 self.hasheroni[term].append(post) #add doc to list 
         else:
+            self.vocabular.append(term)
             post.add_position(position)
             self.hasheroni[term] = [post]
     def get_postings(self, term : str) -> Iterable[Posting]:

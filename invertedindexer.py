@@ -1,15 +1,21 @@
 from pathlib import Path
-from documents import DocumentCorpus, DirectoryCorpus
+from documents import DocumentCorpus, DirectoryCorpus, Document
 from indexing import Index, PositionalInvertedIndex, diskindexwriter
 from indexing.diskpositionalindex import DiskPositionalIndex
 from text import protokenprocessor, englishtokenstream
 from porter2stemmer import Porter2Stemmer
 from queries import booleanqueryparser, querycomponent
+from typing import Iterable
+from queue import PriorityQueue
+import heapq as hq
 import re
 import os
 import time
 import math
 import numpy as np
+import sqlite3
+import struct
+import queue
 
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
@@ -43,16 +49,80 @@ def new_stem(firstphrase : str) -> str:
             
     return " ".join(secondphrase)
 
+def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Path) -> Iterable[Document]:
+    scores = {}
+    heep = []
+    n = len(corpus.documents())
+    #scores = [0] * len(corpus.documents())
+    #q = PriorityQueue()
+    connection = sqlite3.connect("bytepositions.db")
+    sixth_path = path / "postings.bin"
+    f = open(sixth_path,"rb")
+    cursor = connection.cursor()
+    for s in phrase.split(" "): # for each term in query
+        #print(s)
+        #ad = 0
+        term = s.strip()
+        term_postings = index.get_no_postings(term) # posting list for each term
+        cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
+        target_byte = cursor.fetchone()
+        f.seek(target_byte[0])
+        dft = struct.unpack('i', f.read(4))[0] # unpacks dft
+        f.seek(4,1) # skips id to find tftd
+        wqt = float(np.log(1+(n/dft)))
+        #print(dft)
+        #print(n)
+        for t in term_postings: # for each document in term's posting list
+            tftd = struct.unpack('i', f.read(4))[0]     # reads the tftd from file
+            if t.doc_id not in scores.keys():
+                scores[t.doc_id] = 0
+            wdt = float(1 + np.log(tftd))
+            #print(t.doc_id)
+            scores[t.doc_id] += float(wqt * wdt)
+            f.seek(((tftd*4)+4),1)    # jumps past the pi's and id to go back to tftd
+    f.close()
+    seventh_path = path / "docWeights.bin"
+    g = open(seventh_path, "rb")
+    for u in scores.keys():
+        counts = 0
+        #if u != 0:
+        #print(u)
+        g.seek((8*u))
+        ld = struct.unpack('d', g.read(8))[0]
+        scores[u] = float(scores[u] / ld)
+        #temp = scores[u] / ld
+        #q.put(temp)
+        g.seek(0,0)
+    #hq.heapify(scores)
+    for k, v in scores.items():
+        #temp = int(v*10)
+        heep.append(v)
+        #q.put(temp, k)
+    #print(q.get())
+    topt = hq.nlargest(10, heep)
+    for z in topt:
+        #print(z)
+        docids = [k for k, v in scores.items() if v == z][0]
+        #docid = scores.index(z)
+        #print(docids)
+        print(corpus.get_document(docids), " -- ", z)
+    #asz = q.nlargest((10, q))
+    #tim = 0
+    #while tim < 10:
+    #    print(q.get())
+    #    tim+=1
+    #top_k = (10, q)
+    return heep
+
 def index_corpus(corpus : DocumentCorpus) -> Index:
     whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = []
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
     diw = diskindexwriter.DiskIndexWriter()
-    waitlist = []
-    count = 1
+    waitlist = [0]*(len(corpus.documents()))
     for c in corpus:    # c is an individual document in the corpus
-        count+=1
+        
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         wdt_sum = 0
         hashmap = {}    # key = term, value = counting occurence of term in document
@@ -66,8 +136,8 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                     for s in itt:   # s is the processed token in list itt
                         #print(s)
                         #if s == prev_term:
-                        if s not in tdi.vocabular:
-                            tdi.vocabular.append(s)
+                        #if s not in tdi.vocabular:             # I now handle this in tdi.add_term
+                        #    tdi.vocabular.append(s)
                         if s in hashmap:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
                             #tdi.hasheroni[s][-1].add_position(dex)
@@ -85,17 +155,16 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         ld = math.sqrt(wdt_sum)
         #print(ld)
         #print(c.id)
-        waitlist.append(float(ld))
+        waitlist[c.id] = float(ld)
     tdi.vocabular.sort()
-    print(tdi.vocabulary()[7])
-    print("corpus path: " , corpus_path)
+    #print(tdi.vocabulary()[7])
+    #print("corpus path: " , corpus_path)
     diw.write_index(tdi, corpus_path, waitlist)
     return tdi
 
 if __name__ == "__main__":
     print("1. Build index.")
     print("2. Query index.")
-    #newq = ""
     index_question = input("")
     handled = False
     corpus_path = ""
@@ -114,15 +183,15 @@ if __name__ == "__main__":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             test_path = corpus_path / "postings.bin"   # this checks to see if the current corpus path has already been indexed
-            if os.path.exists(test_path) == True:
-                print("NICE SOMETHING WORKED")
-                print(corpus_path)
-                print("here now")
+            #if os.path.exists(test_path) == True:
+                #print("NICE SOMETHING WORKED")
+                #print(corpus_path)
+                #print("here now")
             handled = True
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-    print(len(d.documents()))
+    #print(len(d.documents()))
     dpi = DiskPositionalIndex(corpus_path)
-    print(type(corpus_path))
+    #print(type(corpus_path))
     print("1. Boolean retrieval.")
     print("2. Ranked retrieval.")
     retrieval_question = input("")
@@ -134,11 +203,13 @@ if __name__ == "__main__":
     if retrieval_question == "1":
         while query != ":q":
             query = input("Enter a query: ")
+            if query == ":q":
+                break
             stemmer = Porter2Stemmer()                                      # creates the stemmer object
             if query[0] == '"' or query[-1] == '"':
                 query = stem_this(query)
             fin_query = new_stem(query)
-            print("Query after stemming:", query)                            # prints the final list of words which are stemmed
+            print("Query after stemming:", fin_query)                            # prints the final list of words which are stemmed
             book = bqparser.parse_query(fin_query)          # this will return a query component, basically holds a list of postings
             if query.startswith(':stem'):
                 token_processor = protokenprocessor.ProTokenProcessor()       # even though this already stems the word, I kept it just in case there was a typo maybe
@@ -181,16 +252,22 @@ if __name__ == "__main__":
                                 print("Invalid selection")
                         except:
                             print("Invalid input")
-            if query == ":q":
-                break
             else:
                 print("no results")
-    if retrieval_question == 2:
-        print("okay need to do this now")
+    if retrieval_question == "2":
+        # okay need to do this now
         while query != ":q":
             query = input("Enter a query: ")
+            if query == ":q":
+                break
             stemmer = Porter2Stemmer()                                      # creates the stemmer object
             if query[0] == '"' or query[-1] == '"':
                 query = stem_this(query)
             fin_query = new_stem(query)
-            print("Query after stemming:", query)
+            #print("Query after stemming:", query)
+            tests= dpi.get_no_postings("fauna")
+            #for z in tests:
+            #    print(d.get_document(z.doc_id))
+            scores = cosine_score(fin_query, dpi, d, corpus_path)
+            #for z in scores:
+            #    print(z)
