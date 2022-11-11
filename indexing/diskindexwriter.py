@@ -4,6 +4,7 @@ from bplustree import BPlusTree
 import struct
 import sqlite3
 import os
+import numpy as np
 
 class DiskIndexWriter(Index):
     def write_index(self, pi : PositionalInvertedIndex, deva_path : Path, weights : list[float]):
@@ -39,8 +40,11 @@ class DiskIndexWriter(Index):
                 #print("previous doc id: ", prev_docid)
                 #print("id: ", f.tell())
                 f.write(struct.pack('i', (t.doc_id - prev_docid)))  #id
+                tftd = len(t.position)
+                wdt = float(1 + np.log(tftd))
+                f.write(struct.pack('d', (wdt)))
                 #print("tftd: ", f.tell())
-                f.write(struct.pack('i', len(t.position)))  #tftd
+                f.write(struct.pack('i', tftd))  #tftd
                 prev_docid = t.doc_id        # stores the current doc_id for the gap
                 prev_position = 0
                 for u in t.position:

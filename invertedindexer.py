@@ -68,15 +68,17 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         target_byte = cursor.fetchone()
         f.seek(target_byte[0])
         dft = struct.unpack('i', f.read(4))[0] # unpacks dft
-        f.seek(4,1) # skips id to find tftd
+        f.seek(4,1) # skips id to find tftd 
+                    # now it will be skipping ID to find wdt
         wqt = float(np.log(1+(n/dft)))
         #print(dft)
         #print(n)
         for t in term_postings: # for each document in term's posting list
+            wdt = struct.unpack('d', f.read(8))[0]
             tftd = struct.unpack('i', f.read(4))[0]     # reads the tftd from file
             if t.doc_id not in scores.keys():
                 scores[t.doc_id] = 0
-            wdt = float(1 + np.log(tftd))
+            #wdt = float(1 + np.log(tftd))
             #print(t.doc_id)
             scores[t.doc_id] += float(wqt * wdt)
             f.seek(((tftd*4)+4),1)    # jumps past the pi's and id to go back to tftd
@@ -115,6 +117,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     return heep
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
+    start = time.time()
     whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = []
@@ -156,10 +159,15 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
         #print(ld)
         #print(c.id)
         waitlist[c.id] = float(ld)
+    stop = time.time()
+    print("time it took to index: ", stop - start)
     tdi.vocabular.sort()
     #print(tdi.vocabulary()[7])
     #print("corpus path: " , corpus_path)
+    start2 = time.time()
     diw.write_index(tdi, corpus_path, waitlist)
+    stop2 = time.time()
+    print("time it took to write index to disk: ", stop2 - start)
     return tdi
 
 if __name__ == "__main__":
@@ -173,11 +181,11 @@ if __name__ == "__main__":
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
-            start = time.time()
+            #start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
-            stop = time.time()
-            print("time it took to index: ", stop - start)
+            #stop = time.time()
+            #print("time it took to index: ", stop - start)
             handled = True
         if index_question == "2":
             user_path = input("Enter corpus path: ")

@@ -77,6 +77,7 @@ class DiskPositionalIndex(Index):
         for s in range(size):  # for each doc containing the term
             #preta_path.seek(1,1) # seek to doc_id
             doc_id = struct.unpack('i', f.read(4))[0] #doc_id
+            f.seek(8,1) # skips past the wdt since it isn't important here
             post = Posting(doc_id + prev_docid) #create a posting with the doc_id
             prev_docid += doc_id
             posting_list.append(post)
