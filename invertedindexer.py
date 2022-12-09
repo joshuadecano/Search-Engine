@@ -119,7 +119,6 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
     start = time.time()
-    whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = []
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))

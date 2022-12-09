@@ -102,27 +102,30 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # used as 1/(number found using method above)
 
 #def average_precision(query : str, qrel : int):
-def average_precision(query : str, qrel : str, i : int):
+def average_precision(query : list, qrel : list, i : int):
     # TO DO:
     # Keep a rolling value of precision @ i (precision)
     # this means I'll need a counter for documents returned (counter)
     # and also a counter for relevant items (rel_counter)
     # P@i = rel_counter / counter
     #
-
+    
     counter = 0
+    rel_counter = 0
         
     return 0
 
     # checks if the index i of the list qrel is 
     # new notes: since I'll be passing in values from average_precision to here
     # I might not need query, and just need qrel as a separate list of numbers.
-def relevant(i : int, query : list, qrel : list) -> int:
-    if 
+def relevant(i : int, qrel : list) -> int:
+    if i in qrel:
+        return 1
+    else:
+        return 0
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
     start = time.time()
-    whitespace_re = re.compile(r"\W+")
     token_processor = protokenprocessor.ProTokenProcessor()
     vocabulary = []
     tdi = PositionalInvertedIndex(vocabulary, len(corpus))
