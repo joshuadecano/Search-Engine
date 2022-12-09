@@ -52,6 +52,7 @@ def new_stem(firstphrase : str) -> str:
 def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Path) -> Iterable[Document]:
     scores = {}
     heep = []
+    file_names = []
     n = len(corpus.documents())
     connection = sqlite3.connect("bytepositions.db")
     sixth_path = path / "postings.bin"
@@ -89,11 +90,12 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         g.seek(0,0)
     for k, v in scores.items():
         heep.append(v)
-    topt = hq.nlargest(10, heep)
+    topt = hq.nlargest(50, heep)
     for z in topt:
         docids = [k for k, v in scores.items() if v == z][0]
         print(corpus.get_document(docids), " -- ", z)
-    return heep
+        file_names.append(docids)
+    return file_names
 
     # this will be in a for loop which will pass in each 
     # query in the list as a str 
@@ -101,19 +103,23 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # here i will be using qrel to count how many different numbers separated by whitespace are there
     # used as 1/(number found using method above)
 
-#def average_precision(query : str, qrel : int):
-def average_precision(query : list, qrel : list, i : int):
+#def average_precision(query : str, qrel : int, i : int):
+def average_precision(query : str, qrel : list, scores_list : list) -> float:
     # TO DO:
     # Keep a rolling value of precision @ i (precision)
     # this means I'll need a counter for documents returned (counter)
     # and also a counter for relevant items (rel_counter)
     # P@i = rel_counter / counter
-    #
-    
+    # ASSUMING THIS ONLY APPLIES TO TEST COLLECTIONS AND WE HAVE ALREADY INDEXED THE SELECTED FOLDER.
+    # *since we don't have the qrel for the whole parks corpus
+
+    # since we are already in the relevance____ 
+    ap = 0
     counter = 0
     rel_counter = 0
+
         
-    return 0
+    return ap
 
     # checks if the index i of the list qrel is 
     # new notes: since I'll be passing in values from average_precision to here
@@ -132,7 +138,6 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
     diw = diskindexwriter.DiskIndexWriter()
     waitlist = [0]*(len(corpus.documents()))
     for c in corpus:    # c is an individual document in the corpus
-        
         tokensz = englishtokenstream.EnglishTokenStream(c.get_content())
         wdt_sum = 0
         hashmap = {}    # key = term, value = counting occurence of term in document
@@ -209,6 +214,7 @@ if __name__ == "__main__":
     #print(type(corpus_path))
     print("1. Boolean retrieval.")
     print("2. Ranked retrieval.")
+    #print("3. Mean Average Precision.")
     retrieval_question = input("")
 
     # Begin retrieval
@@ -278,17 +284,48 @@ if __name__ == "__main__":
                 print("no results")
     if retrieval_question == "2":
         # okay need to do this now
-        while query != ":q":
-            query = input("Enter a query: ")
-            if query == ":q":
+        token_processor = protokenprocessor.ProTokenProcessor()
+        # lines of query as string
+        query_list = []
+        # lines of relevant files as a string (not int)
+        qrel_list = []
+        q_path = corpus_path / "relevance"
+        with open(q_path / "queries") as file:
+            for line in file:
+                query_list.append(line.rstrip())
+        with open(q_path / "qrel") as file:
+            for line in file:
+                qrel_list.append(line.rstrip())
+        while choice != ":q":
+            print("1. Query by index.")
+            print("2. Mean Average Precision.")
+            choice = input("")
+            if choice == ":q":
                 break
-            stemmer = Porter2Stemmer()                                      # creates the stemmer object
-            if query[0] == '"' or query[-1] == '"':
-                query = stem_this(query)
-            fin_query = new_stem(query)
-            #print("Query after stemming:", query)
-            tests= dpi.get_no_postings("fauna")
-            #for z in tests:
-            #    print(d.get_document(z.doc_id))
-            scores = cosine_score(fin_query, dpi, d, corpus_path)
-            
+            #stemmer = Porter2Stemmer()                                      # creates the stemmer object
+            #if query[0] == '"' or query[-1] == '"':
+            #    query = stem_this(query)
+            #fin_query = new_stem(query)
+            if choice == "1":
+                print("Enter a query by index:")
+                query_index = input("")
+                query_tokens = []
+                # for each token in the query, we will process it and add it to a list
+                for s in query_list[query_index].split():
+                    query_tokens.append(token_processor.process_token(s))
+                fin_query = " ".join(query_tokens)
+                scores = cosine_score(fin_query, dpi, d, corpus_path)
+                average_precision()
+            if choice == "2":
+                map = 0
+                # for each line in both files
+                for i in range(len(query_list)):
+                    # for each line, qrel is a new list of doc names as integers
+                    qrel = []
+                    for s in qrel_list[i].split(" "):
+                            qrel.append(int(s))
+                    # passes in each query line
+                    # and each relevant document line (by name)
+                    scores = cosine_score(fin_query, dpi, d, corpus_path)
+                    map += average_precision(query_list, qrel, scores)
+                print("Mean Average Precision: ", map)

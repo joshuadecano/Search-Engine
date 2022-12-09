@@ -36,6 +36,4 @@ class ProTokenProcessor(TokenProcessor):
         #ltoken = token.lower()
         stemd = stemmer.stem(stoken)
         final_return.append(stemd)
-        #except:
-        #    nothings = 0
         return final_return

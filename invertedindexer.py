@@ -20,6 +20,7 @@ import queue
 """This basic program builds a term-document matrix over the .txt files in 
 the same directory as this file."""
 
+# this is for phrase literals
 def stem_this(firstphrase : str) -> str:
     stemmer = Porter2Stemmer()
     secondphrase = []
@@ -38,6 +39,7 @@ def stem_this(firstphrase : str) -> str:
     return '"' + " ".join(secondphrase) + '"'
     #return final_phrase
 
+# this is for all other queries
 def new_stem(firstphrase : str) -> str:
     stemmer = Porter2Stemmer()
     secondphrase =[]
