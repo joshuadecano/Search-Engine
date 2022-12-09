@@ -98,11 +98,12 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # this will be in a for loop which will pass in each 
     # query in the list as a str 
     # and each qrel as the total number of relevant 
-def average_precision(query : str, qrel : int):
+#def average_precision(query : str, qrel : int):
+def average_precision(query : str, i : int):
         
     return 0
 
-    # checks if the index i of the list is 
+    # checks if the index i of the list qrel is 
 def relevant(i : int, query : list, qrel : list) -> int:
     if  
 
