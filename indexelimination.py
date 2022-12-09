@@ -104,7 +104,7 @@ def average_precision(query : str, qrel : int):
 
     # checks if the index i of the list is 
 def relevant(i : int, query : list, qrel : list) -> int:
-    if 
+    if  
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
     start = time.time()
