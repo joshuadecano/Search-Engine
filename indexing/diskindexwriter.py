@@ -8,6 +8,7 @@ import numpy as np
 
 class DiskIndexWriter(Index):
     def write_index(self, pi : PositionalInvertedIndex, deva_path : Path, weights : list[float]):
+        
         asura_path = deva_path / "postings.bin"
         if os.path.exists(asura_path) == True:
             os.remove(asura_path)
@@ -66,7 +67,7 @@ class DiskIndexWriter(Index):
                                 "VALUES (?, ?)") #, (terms, position))
             cursor.execute(add_byte_position, inputs)
             connection.commit()
-        print("jesus christ")
+        #print("jesus christ")
         connection.close()
         f.close()
         preta_path = deva_path / "docWeights.bin"

@@ -94,7 +94,8 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     for z in topt:
         docids = [k for k, v in scores.items() if v == z][0]
         print(corpus.get_document(docids), " -- ", z)
-        file_names.append(docids)
+        temp = corpus.get_document(docids)
+        file_names.append(int(temp.title()))
     return file_names
 
     # this will be in a for loop which will pass in each 
@@ -104,7 +105,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # used as 1/(number found using method above)
 
 #def average_precision(query : str, qrel : int, i : int):
-def average_precision(query : str, qrel : list, scores_list : list) -> float:
+def average_precision(query : str, qrel : list, doc_list : list) -> float:
     # TO DO:
     # Keep a rolling value of precision @ i (precision)
     # this means I'll need a counter for documents returned (counter)
@@ -117,15 +118,19 @@ def average_precision(query : str, qrel : list, scores_list : list) -> float:
     ap = 0
     counter = 0
     rel_counter = 0
-
-        
+    rel = len(qrel)
+    for doc in doc_list:
+        rel_counter += relevant(counter, qrel, doc_list)
+        ap += relevant(counter, qrel, doc_list) * (rel_counter/counter)
+        counter += 1
+    ap = ap/rel
     return ap
 
     # checks if the index i of the list qrel is 
     # new notes: since I'll be passing in values from average_precision to here
     # I might not need query, and just need qrel as a separate list of numbers.
-def relevant(i : int, qrel : list) -> int:
-    if i in qrel:
+def relevant(i : int, qrel : list, doc_list : list) -> int:
+    if doc_list[i] in qrel:
         return 1
     else:
         return 0
@@ -193,6 +198,7 @@ if __name__ == "__main__":
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
+            os.chdir(user_path)
             #start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
@@ -202,6 +208,7 @@ if __name__ == "__main__":
         if index_question == "2":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
+            os.chdir(user_path)
             test_path = corpus_path / "postings.bin"   # this checks to see if the current corpus path has already been indexed
             #if os.path.exists(test_path) == True:
                 #print("NICE SOMETHING WORKED")
@@ -283,6 +290,7 @@ if __name__ == "__main__":
             else:
                 print("no results")
     if retrieval_question == "2":
+        choice = ""
         # okay need to do this now
         token_processor = protokenprocessor.ProTokenProcessor()
         # lines of query as string
@@ -308,11 +316,11 @@ if __name__ == "__main__":
             #fin_query = new_stem(query)
             if choice == "1":
                 print("Enter a query by index:")
-                query_index = input("")
+                query_index = int(input(""))
                 query_tokens = []
                 # for each token in the query, we will process it and add it to a list
                 for s in query_list[query_index].split():
-                    query_tokens.append(token_processor.process_token(s))
+                    query_tokens.append(token_processor.process_token(s)[0])
                 fin_query = " ".join(query_tokens)
                 scores = cosine_score(fin_query, dpi, d, corpus_path)
                 average_precision()
