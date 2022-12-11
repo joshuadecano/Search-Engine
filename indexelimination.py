@@ -7,6 +7,8 @@ from porter2stemmer import Porter2Stemmer
 from queries import booleanqueryparser, querycomponent
 from typing import Iterable
 from queue import PriorityQueue
+from io import StringIO
+import json
 import heapq as hq
 import re
 import os
@@ -58,7 +60,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     sixth_path = path / "postings.bin"
     f = open(sixth_path,"rb")
     cursor = connection.cursor()
-    threshold = 1
+    threshold = .001
     for s in phrase.split(" "): # for each term in query
         term = s.strip()
         term_postings = index.get_no_postings(term) # posting list for each term
@@ -95,7 +97,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         docids = [k for k, v in scores.items() if v == z][0]
         print(corpus.get_document(docids), " -- ", z)
         temp = corpus.get_document(docids)
-        file_names.append(int(temp.title()))
+        file_names.append(temp.title)
     return file_names
 
     # this will be in a for loop which will pass in each 
@@ -103,6 +105,19 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # and each qrel as the total number of relevant
     # here i will be using qrel to count how many different numbers separated by whitespace are there
     # used as 1/(number found using method above)
+
+    # checks if the index i of the list qrel is 
+    # new notes: since I'll be passing in values from average_precision to here
+    # I might not need query, and just need qrel as a separate list of numbers.
+def relevant(i : int, qrel : list, doc : str) -> int:
+    #print(qrel)
+    #print(doc)
+    #print("hello")
+    if doc in qrel:
+        print("NICE")
+        return 1
+    else:
+        return 0
 
 #def average_precision(query : str, qrel : int, i : int):
 def average_precision(query : str, qrel : list, doc_list : list) -> float:
@@ -119,21 +134,18 @@ def average_precision(query : str, qrel : list, doc_list : list) -> float:
     counter = 0
     rel_counter = 0
     rel = len(qrel)
+    #print("well")
+    #print(doc_list)
     for doc in doc_list:
         rel_counter += relevant(counter, qrel, doc_list)
-        ap += relevant(counter, qrel, doc_list) * (rel_counter/counter)
+        print(rel_counter)
         counter += 1
+        ap += relevant(counter, qrel, doc) * (rel_counter/counter)
+        print(ap)
     ap = ap/rel
     return ap
 
-    # checks if the index i of the list qrel is 
-    # new notes: since I'll be passing in values from average_precision to here
-    # I might not need query, and just need qrel as a separate list of numbers.
-def relevant(i : int, qrel : list, doc_list : list) -> int:
-    if doc_list[i] in qrel:
-        return 1
-    else:
-        return 0
+
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
     start = time.time()
@@ -318,12 +330,29 @@ if __name__ == "__main__":
                 print("Enter a query by index:")
                 query_index = int(input(""))
                 query_tokens = []
+                qrel = []
                 # for each token in the query, we will process it and add it to a list
                 for s in query_list[query_index].split():
                     query_tokens.append(token_processor.process_token(s)[0])
                 fin_query = " ".join(query_tokens)
+                for s in qrel_list[query_index].split():
+                    holder = str(s + '.json')
+                    #print(holder)
+                    #f = open(holder)
+                    #data = json.load(f)
+                    #print(data["title"])
+                    next_path = corpus_path / str(s+ ".json")
+                    #print(next_path)
+                    with open(next_path, 'r', encoding="utf-8") as file:
+                        jtitle = json.load(file)
+                        title = jtitle["title"]
+                        #print(title)
+                        qrel.append(title)
+
                 scores = cosine_score(fin_query, dpi, d, corpus_path)
-                average_precision()
+                #print(scores)
+                app = average_precision(query_list, qrel, scores)
+                print(app)
             if choice == "2":
                 map = 0
                 # for each line in both files
@@ -331,9 +360,18 @@ if __name__ == "__main__":
                     # for each line, qrel is a new list of doc names as integers
                     qrel = []
                     for s in qrel_list[i].split(" "):
+                        # here I need to somehow turn the numbers (int(s)) into the file titles.
+                        next_path = corpus_path / int(s) / ".json"
+                        print(next_path)
+                        with open(next_path, 'r', encoding="utf-8") as file:
+                            jtitle = json.load(file)
+                            title = StringIO(jtitle["title"])
+                            print(title)
                             qrel.append(int(s))
+                        
                     # passes in each query line
                     # and each relevant document line (by name)
                     scores = cosine_score(fin_query, dpi, d, corpus_path)
+                    
                     map += average_precision(query_list, qrel, scores)
                 print("Mean Average Precision: ", map)
