@@ -25,7 +25,6 @@ the same directory as this file."""
 def stem_this(firstphrase : str) -> str:
     stemmer = Porter2Stemmer()
     secondphrase = []
-    final_phrase = ""
     for t in firstphrase.split(" "):
         tok = t.strip()
         if len(tok) > 0:
@@ -35,10 +34,8 @@ def stem_this(firstphrase : str) -> str:
             if not tok[-1].isalnum():  # removes the last letter if its not alphanumeric
                 tok = tok[:-1]
             temp = stemmer.stem(tok)
-            #print(temp)
             secondphrase.append(temp)
     return '"' + " ".join(secondphrase) + '"'
-    #return final_phrase
 
 def new_stem(firstphrase : str) -> str:
     stemmer = Porter2Stemmer()
@@ -60,25 +57,20 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     sixth_path = path / "postings.bin"
     f = open(sixth_path,"rb")
     cursor = connection.cursor()
-    threshold = 1.25
+    threshold = 2.5
     for s in phrase.split(" "): # for each term in query
         term = s.strip()
-        #print(term)
         cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
         target_byte = cursor.fetchone()
         if target_byte == None:
             continue
         term_postings = index.get_no_postings(term) # posting list for each term
-        #cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
-        #target_byte = cursor.fetchone()
         f.seek(target_byte[0])
         dft = struct.unpack('i', f.read(4))[0] # unpacks dft
         f.seek(4,1) # skips id to find tftd 
                     # now it will be skipping ID to find wdt
         wqt = float(np.log(1+(n/dft)))
-        #print(wqt)
         if wqt < threshold:
-            #print("Skipped Term - ", s)
             continue
         else:
             for t in term_postings: # for each document in term's posting list
@@ -117,36 +109,27 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # I might not need query, and just need qrel as a separate list of numbers.
 def relevant(qrel : list, doc : str) -> int:
     if doc in qrel:
-        #print("NICE")
-        #p = 1
         return 1
     else:
         return 0
 
-#def average_precision(query : str, qrel : int, i : int):
-def average_precision(query : str, qrel : list, doc_list : list) -> float:
+def average_precision(query : str, qrel : list, doc_list : list) -> list:
     ap = 0
     counter = 0
     rel_counter = 0
     rel = len(qrel)
-    #print(rel)
     for doc in range(len(doc_list)):
         if doc_list[doc] in qrel:
             relevance = 1
             rel_counter += 1
-            #print("Relevant at index: ", doc)
+            doc_list[doc] = doc_list[doc] + " - Relevant"
         else:
             relevance = 0
         counter += 1
-        #print("rel counter: ", rel_counter)
-        #print("counter: ", counter)
-        #precision = rel_counter/counter
-        #print("P@", counter, ": ", precision)
         ap += relevance * (rel_counter/counter)
-    #print("# of relevant returned documents: ", rel_counter)
     ap = ap/rel
-    return ap
-
+    doc_list.append(ap)
+    return doc_list
 
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
@@ -168,17 +151,10 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                 itt = token_processor.process_token(temp)
                 if itt is not None:
                     for s in itt:   # s is the processed token in list itt
-                        #print(s)
-                        #if s == prev_term:
-                        #if s not in tdi.vocabular:             # I now handle this in tdi.add_term
-                        #    tdi.vocabular.append(s)
                         if s in hashmap:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
-                            #tdi.hasheroni[s][-1].add_position(dex)
                         else:
                             hashmap[s] = 1      # if the term is not yet in the hashmap, set it to 1
-                            #tdi.add_term(s, c.id, dex)
-                        #print(s)
                         tdi.add_term(s, c.id, dex)
                         
                         dex += 1        # increments by 1 for every token passed in to add_term
@@ -187,18 +163,14 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
             temp = (1 + np.log(tftd))
             wdt_sum += temp**2
         ld = math.sqrt(wdt_sum)
-        #print(ld)
-        #print(c.id)
         waitlist[c.id] = float(ld)
     stop = time.time()
     print("time it took to index: ", stop - start)
     tdi.vocabular.sort()
-    #print(tdi.vocabulary()[7])
-    #print("corpus path: " , corpus_path)
     start2 = time.time()
     diw.write_index(tdi, corpus_path, waitlist)
     stop2 = time.time()
-    print("time it took to write index to disk: ", stop2 - start)
+    print("time it took to write index to disk: ", stop2 - start2)
     return tdi
 
 if __name__ == "__main__":
@@ -213,33 +185,21 @@ if __name__ == "__main__":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             os.chdir(user_path)
-            #start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
-            #stop = time.time()
-            #print("time it took to index: ", stop - start)
             handled = True
         if index_question == "2":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             os.chdir(user_path)
             test_path = corpus_path / "postings.bin"   # this checks to see if the current corpus path has already been indexed
-            #if os.path.exists(test_path) == True:
-                #print("NICE SOMETHING WORKED")
-                #print(corpus_path)
-                #print("here now")
             handled = True
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-    #print(len(d.documents()))
     dpi = DiskPositionalIndex(corpus_path)
-    #print(type(corpus_path))
     print("1. Boolean retrieval.")
     print("2. Ranked retrieval.")
-    #print("3. Mean Average Precision.")
     retrieval_question = input("")
 
-    # Begin retrieval
-    #query = input("Enter a query")
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
     if retrieval_question == "1":
@@ -259,7 +219,6 @@ if __name__ == "__main__":
                 print(stemmer.stem(token))
                 continue
             if query.startswith(':index'):
-                #token_processor = protokenprocessor.ProTokenProcessor()
                 newpath = query.split()[1:]
                 print(newpath)
                 corpus_path = Path(newpath)
@@ -267,8 +226,6 @@ if __name__ == "__main__":
                 continue
             if query.startswith(':vocab'):
                 connection = sqlite3.connect("bytepositions.db")
-                #sixth_path = corpus_path / "postings.bin"
-                #f = open(sixth_path,"rb")
                 cursor = connection.cursor()
                 testss = dpi.vocabulary()
                 cursor.execute("SELECT terms FROM bytes")
@@ -305,7 +262,6 @@ if __name__ == "__main__":
                 print("no results")
     if retrieval_question == "2":
         choice = ""
-        # okay need to do this now
         token_processor = protokenprocessor.ProTokenProcessor()
         # lines of query as string
         query_list = []
@@ -324,10 +280,6 @@ if __name__ == "__main__":
             choice = input("")
             if choice == ":q":
                 break
-            #stemmer = Porter2Stemmer()                                      # creates the stemmer object
-            #if query[0] == '"' or query[-1] == '"':
-            #    query = stem_this(query)
-            #fin_query = new_stem(query)
             if choice == "1":
                 print("Enter a query by index:")
                 query_index = int(input(""))
@@ -342,31 +294,31 @@ if __name__ == "__main__":
                 fin_query = " ".join(query_tokens)
                 for s in qrel_list[query_index].split():
                     doc_name = str(s).zfill(4)
-                    #print(holder)
-                    #f = open(holder)
-                    #data = json.load(f)
-                    #print(data["title"])
                     next_path = corpus_path / str(doc_name + ".json")
-                    #print(next_path)
                     with open(next_path, 'r', encoding="utf-8") as file:
                         jtitle = json.load(file)
                         title = jtitle["title"]
-                        #print(title)
                         qrel.append(title)
-
-                scores = cosine_score(fin_query, dpi, d, corpus_path)
-                #print(scores)
-                app = average_precision(query_list, qrel, scores)
-                print("Average Precision: ", app)
+                iterations = 0
+                start = time.time()
+                while (iterations < 30):
+                    scores = cosine_score(fin_query, dpi, d, corpus_path)
+                    iterations += 1
+                stop = time.time()
+                print("Throughput for the query: ", iterations/(stop-start))
+                relret = average_precision(query_list, qrel, scores)
+                doc_counter = 0
+                while doc_counter < 50:
+                    print(relret[doc_counter])
+                    doc_counter += 1
+                print("Average Precision: ", relret[-1])
             if choice == "2":
+                ap = 0
                 map = 0
                 start = time.time()
                 query_count = len(query_list)
-                #query_count = 0
                 # for each line in both files
                 for i in range(query_count):
-                    #if query_count == 0:
-                    #    start = time.time()
                     # for each line, qrel is a new list of doc names as integers
                     query_tokens = []
                     qrel = []
@@ -381,23 +333,15 @@ if __name__ == "__main__":
                         doc_name = str(s).zfill(4)
                         # here I need to somehow turn the numbers (int(s)) into the file titles.
                         next_path = corpus_path / str(doc_name + ".json")
-                        #print(next_path)
                         with open(next_path, 'r', encoding="utf-8") as file:
                             jtitle = json.load(file)
                             title = jtitle["title"]
-                            #print(title)
                             qrel.append(title)
-                        
                     # passes in each query line
                     # and each relevant document line (by name)
-                    #print(query_list[i])
                     scores = cosine_score(fin_query, dpi, d, corpus_path)
-                    map += average_precision(query_list, qrel, scores)
-                    #query_count += 1
-                    #if query_count == 30:
-                    #    stop = time.time()
-                    #    print("Throughput for ")
-                
+                    ap = average_precision(query_list, qrel, scores)[-1]
+                    map += ap
                 stop = time.time()
                 mrt = (stop-start) / query_count
                 print("Mean Response Time: ", mrt)
