@@ -305,12 +305,17 @@ if __name__ == "__main__":
                     scores = cosine_score(fin_query, dpi, d, corpus_path)
                     iterations += 1
                 stop = time.time()
-                print("Throughput for the query: ", iterations/(stop-start))
                 relret = average_precision(query_list, qrel, scores)
                 doc_counter = 0
-                while doc_counter < 50:
+                if (len(relret) < 50):
+                    print("Returned less than K=50 results")
+                    print("Lower threshold and try again.")
+                    print("")
+                    continue
+                while doc_counter < 50: 
                     print(relret[doc_counter])
                     doc_counter += 1
+                print("Throughput for the query: ", iterations/(stop-start))
                 print("Average Precision: ", relret[-1])
             if choice == "2":
                 ap = 0

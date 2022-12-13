@@ -65,9 +65,11 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         #print(s)
         #ad = 0
         term = s.strip()
-        term_postings = index.get_no_postings(term) # posting list for each term
         cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
         target_byte = cursor.fetchone()
+        if target_byte == None:
+            continue
+        term_postings = index.get_no_postings(term) # posting list for each term
         f.seek(target_byte[0])
         dft = struct.unpack('i', f.read(4))[0] # unpacks dft
         f.seek(4,1) # skips id to find tftd 
@@ -75,7 +77,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         wqt = float(np.log(1+(n/dft)))
         #print(dft)
         #print(n)
-        print(wqt)
+        #print(wqt)
         for t in term_postings: # for each document in term's posting list
             wdt = struct.unpack('d', f.read(8))[0]
             tftd = struct.unpack('i', f.read(4))[0]     # reads the tftd from file
