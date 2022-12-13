@@ -60,7 +60,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     sixth_path = path / "postings.bin"
     f = open(sixth_path,"rb")
     cursor = connection.cursor()
-    threshold = .001
+    threshold = 1.25
     for s in phrase.split(" "): # for each term in query
         term = s.strip()
         term_postings = index.get_no_postings(term) # posting list for each term
@@ -71,8 +71,9 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         f.seek(4,1) # skips id to find tftd 
                     # now it will be skipping ID to find wdt
         wqt = float(np.log(1+(n/dft)))
-        print(wqt)
+        #print(wqt)
         if wqt < threshold:
+            #print("Skipped Term - ", s)
             continue
         else:
             for t in term_postings: # for each document in term's posting list
@@ -95,7 +96,7 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     topt = hq.nlargest(50, heep)
     for z in topt:
         docids = [k for k, v in scores.items() if v == z][0]
-        print(corpus.get_document(docids), " -- ", z)
+        #print(corpus.get_document(docids), " -- ", z)
         temp = corpus.get_document(docids)
         file_names.append(temp.title)
     return file_names
@@ -109,39 +110,35 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     # checks if the index i of the list qrel is 
     # new notes: since I'll be passing in values from average_precision to here
     # I might not need query, and just need qrel as a separate list of numbers.
-def relevant(i : int, qrel : list, doc : str) -> int:
-    #print(qrel)
-    #print(doc)
-    #print("hello")
+def relevant(qrel : list, doc : str) -> int:
     if doc in qrel:
-        print("NICE")
+        #print("NICE")
+        #p = 1
         return 1
     else:
         return 0
 
 #def average_precision(query : str, qrel : int, i : int):
 def average_precision(query : str, qrel : list, doc_list : list) -> float:
-    # TO DO:
-    # Keep a rolling value of precision @ i (precision)
-    # this means I'll need a counter for documents returned (counter)
-    # and also a counter for relevant items (rel_counter)
-    # P@i = rel_counter / counter
-    # ASSUMING THIS ONLY APPLIES TO TEST COLLECTIONS AND WE HAVE ALREADY INDEXED THE SELECTED FOLDER.
-    # *since we don't have the qrel for the whole parks corpus
-
-    # since we are already in the relevance____ 
     ap = 0
     counter = 0
     rel_counter = 0
     rel = len(qrel)
-    #print("well")
-    #print(doc_list)
-    for doc in doc_list:
-        rel_counter += relevant(counter, qrel, doc_list)
-        print(rel_counter)
+    #print(rel)
+    for doc in range(len(doc_list)):
+        if doc_list[doc] in qrel:
+            relevance = 1
+            rel_counter += 1
+            #print("Relevant at index: ", doc)
+        else:
+            relevance = 0
         counter += 1
-        ap += relevant(counter, qrel, doc) * (rel_counter/counter)
-        print(ap)
+        #print("rel counter: ", rel_counter)
+        #print("counter: ", counter)
+        #precision = rel_counter/counter
+        #print("P@", counter, ": ", precision)
+        ap += relevance * (rel_counter/counter)
+    print("# of relevant returned documents: ", rel_counter)
     ap = ap/rel
     return ap
 
@@ -333,9 +330,13 @@ if __name__ == "__main__":
                 qrel = []
                 # for each token in the query, we will process it and add it to a list
                 for s in query_list[query_index].split():
-                    query_tokens.append(token_processor.process_token(s)[0])
+                    if not s.isalnum():
+                        continue
+                    else:
+                        query_tokens.append(token_processor.process_token(s)[0])
                 fin_query = " ".join(query_tokens)
                 for s in qrel_list[query_index].split():
+                    s = str(s).zfill(4)
                     holder = str(s + '.json')
                     #print(holder)
                     #f = open(holder)
