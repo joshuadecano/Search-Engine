@@ -63,9 +63,14 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     threshold = 1.25
     for s in phrase.split(" "): # for each term in query
         term = s.strip()
-        term_postings = index.get_no_postings(term) # posting list for each term
+        #print(term)
         cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
         target_byte = cursor.fetchone()
+        if target_byte == None:
+            continue
+        term_postings = index.get_no_postings(term) # posting list for each term
+        #cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
+        #target_byte = cursor.fetchone()
         f.seek(target_byte[0])
         dft = struct.unpack('i', f.read(4))[0] # unpacks dft
         f.seek(4,1) # skips id to find tftd 
@@ -138,7 +143,7 @@ def average_precision(query : str, qrel : list, doc_list : list) -> float:
         #precision = rel_counter/counter
         #print("P@", counter, ": ", precision)
         ap += relevance * (rel_counter/counter)
-    print("# of relevant returned documents: ", rel_counter)
+    #print("# of relevant returned documents: ", rel_counter)
     ap = ap/rel
     return ap
 
@@ -336,13 +341,12 @@ if __name__ == "__main__":
                         query_tokens.append(token_processor.process_token(s)[0])
                 fin_query = " ".join(query_tokens)
                 for s in qrel_list[query_index].split():
-                    s = str(s).zfill(4)
-                    holder = str(s + '.json')
+                    doc_name = str(s).zfill(4)
                     #print(holder)
                     #f = open(holder)
                     #data = json.load(f)
                     #print(data["title"])
-                    next_path = corpus_path / str(s+ ".json")
+                    next_path = corpus_path / str(doc_name + ".json")
                     #print(next_path)
                     with open(next_path, 'r', encoding="utf-8") as file:
                         jtitle = json.load(file)
@@ -353,26 +357,51 @@ if __name__ == "__main__":
                 scores = cosine_score(fin_query, dpi, d, corpus_path)
                 #print(scores)
                 app = average_precision(query_list, qrel, scores)
-                print(app)
+                print("Average Precision: ", app)
             if choice == "2":
                 map = 0
+                start = time.time()
+                query_count = len(query_list)
+                #query_count = 0
                 # for each line in both files
-                for i in range(len(query_list)):
+                for i in range(query_count):
+                    #if query_count == 0:
+                    #    start = time.time()
                     # for each line, qrel is a new list of doc names as integers
+                    query_tokens = []
                     qrel = []
-                    for s in qrel_list[i].split(" "):
+                    # for each token in the query, we will process it and add it to a list
+                    for s in query_list[i].split():
+                        if not s.isalnum():
+                            continue
+                        else:
+                            query_tokens.append(token_processor.process_token(s)[0])
+                    fin_query = " ".join(query_tokens)
+                    for s in qrel_list[i].split():
+                        doc_name = str(s).zfill(4)
                         # here I need to somehow turn the numbers (int(s)) into the file titles.
-                        next_path = corpus_path / int(s) / ".json"
-                        print(next_path)
+                        next_path = corpus_path / str(doc_name + ".json")
+                        #print(next_path)
                         with open(next_path, 'r', encoding="utf-8") as file:
                             jtitle = json.load(file)
-                            title = StringIO(jtitle["title"])
-                            print(title)
-                            qrel.append(int(s))
+                            title = jtitle["title"]
+                            #print(title)
+                            qrel.append(title)
                         
                     # passes in each query line
                     # and each relevant document line (by name)
+                    #print(query_list[i])
                     scores = cosine_score(fin_query, dpi, d, corpus_path)
-                    
                     map += average_precision(query_list, qrel, scores)
+                    #query_count += 1
+                    #if query_count == 30:
+                    #    stop = time.time()
+                    #    print("Throughput for ")
+                
+                stop = time.time()
+                mrt = (stop-start) / query_count
+                print("Mean Response Time: ", mrt)
+                throughput = query_count / (stop-start)
+                print("Throughput: ", throughput)
+                map = map/query_count
                 print("Mean Average Precision: ", map)
