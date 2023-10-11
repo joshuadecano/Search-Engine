@@ -28,7 +28,6 @@ def stem_this(firstphrase : str) -> str:
     for t in firstphrase.split(" "):
         tok = t.strip()
         if len(tok) > 0:
-            #print(tok)
             if not tok[0].isalnum():   # removes the first letter if its not alphanumeric
                 tok = tok[1:]
             if not tok[-1].isalnum():  # removes the last letter if its not alphanumeric
@@ -98,15 +97,6 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         file_names.append(temp.title)
     return file_names
 
-    # this will be in a for loop which will pass in each 
-    # query in the list as a str 
-    # and each qrel as the total number of relevant
-    # here i will be using qrel to count how many different numbers separated by whitespace are there
-    # used as 1/(number found using method above)
-
-    # checks if the index i of the list qrel is 
-    # new notes: since I'll be passing in values from average_precision to here
-    # I might not need query, and just need qrel as a separate list of numbers.
 def relevant(qrel : list, doc : str) -> int:
     if doc in qrel:
         return 1

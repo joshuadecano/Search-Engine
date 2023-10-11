@@ -54,13 +54,6 @@ class DirectoryCorpus:
                 next_id += 1
         return results
 
-##    @staticmethod
-##    def load_text_directory(path, extension) -> 'DirectoryCorpus':
-##        c = DirectoryCorpus(path, 
-##                lambda f: f.suffix == extension, 
-##                factories={extension: textfiledocument.TextFileDocument.load_from})
-##        return c
-
     @staticmethod
     def load_json_directory(path, extension) -> 'DirectoryCorpus':
         c = DirectoryCorpus(path,

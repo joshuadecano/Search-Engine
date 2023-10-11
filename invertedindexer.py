@@ -55,15 +55,11 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     scores = {}
     heep = []
     n = len(corpus.documents())
-    #scores = [0] * len(corpus.documents())
-    #q = PriorityQueue()
     connection = sqlite3.connect("bytepositions.db")
     sixth_path = path / "postings.bin"
     f = open(sixth_path,"rb")
     cursor = connection.cursor()
     for s in phrase.split(" "): # for each term in query
-        #print(s)
-        #ad = 0
         term = s.strip()
         cursor.execute("SELECT position FROM bytes WHERE terms = (?)", (term, ))
         target_byte = cursor.fetchone()
@@ -75,16 +71,11 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
         f.seek(4,1) # skips id to find tftd 
                     # now it will be skipping ID to find wdt
         wqt = float(np.log(1+(n/dft)))
-        #print(dft)
-        #print(n)
-        #print(wqt)
         for t in term_postings: # for each document in term's posting list
             wdt = struct.unpack('d', f.read(8))[0]
             tftd = struct.unpack('i', f.read(4))[0]     # reads the tftd from file
             if t.doc_id not in scores.keys():
                 scores[t.doc_id] = 0
-            #wdt = float(1 + np.log(tftd))
-            #print(t.doc_id)
             scores[t.doc_id] += float(wqt * wdt)
             f.seek(((tftd*4)+4),1)    # jumps past the pi's and id to go back to tftd
     f.close()
@@ -92,33 +83,16 @@ def cosine_score(phrase : str, index : Index, corpus : DocumentCorpus, path = Pa
     g = open(seventh_path, "rb")
     for u in scores.keys():
         counts = 0
-        #if u != 0:
-        #print(u)
         g.seek((8*u))
         ld = struct.unpack('d', g.read(8))[0]
         scores[u] = float(scores[u] / ld)
-        #temp = scores[u] / ld
-        #q.put(temp)
         g.seek(0,0)
-    #hq.heapify(scores)
     for k, v in scores.items():
-        #temp = int(v*10)
         heep.append(v)
-        #q.put(temp, k)
-    #print(q.get())
     topt = hq.nlargest(10, heep)
     for z in topt:
-        #print(z)
         docids = [k for k, v in scores.items() if v == z][0]
-        #docid = scores.index(z)
-        #print(docids)
         print(corpus.get_document(docids), " -- ", z)
-    #asz = q.nlargest((10, q))
-    #tim = 0
-    #while tim < 10:
-    #    print(q.get())
-    #    tim+=1
-    #top_k = (10, q)
     return heep
 
 def index_corpus(corpus : DocumentCorpus) -> Index:
@@ -141,17 +115,10 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
                 itt = token_processor.process_token(temp)
                 if itt is not None:
                     for s in itt:   # s is the processed token in list itt
-                        #print(s)
-                        #if s == prev_term:
-                        #if s not in tdi.vocabular:             # I now handle this in tdi.add_term
-                        #    tdi.vocabular.append(s)
                         if s in hashmap:
                             hashmap[s] += 1     # if the term is already in the hashmap keys add 1 to the counter
-                            #tdi.hasheroni[s][-1].add_position(dex)
                         else:
                             hashmap[s] = 1      # if the term is not yet in the hashmap, set it to 1
-                            #tdi.add_term(s, c.id, dex)
-                        #print(s)
                         tdi.add_term(s, c.id, dex)
                         
                         dex += 1        # increments by 1 for every token passed in to add_term
@@ -160,14 +127,10 @@ def index_corpus(corpus : DocumentCorpus) -> Index:
             temp = (1 + np.log(tftd))
             wdt_sum += temp**2
         ld = math.sqrt(wdt_sum)
-        #print(ld)
-        #print(c.id)
         waitlist[c.id] = float(ld)
     stop = time.time()
     print("time it took to index: ", stop - start)
     tdi.vocabular.sort()
-    #print(tdi.vocabulary()[7])
-    #print("corpus path: " , corpus_path)
     start2 = time.time()
     diw.write_index(tdi, corpus_path, waitlist)
     stop2 = time.time()
@@ -185,31 +148,21 @@ if __name__ == "__main__":
         if index_question == "1":     # indexes corpus to RAM and then writes it to disk
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
-            #start = time.time()
             d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
             index = index_corpus(d)
-            #stop = time.time()
-            #print("time it took to index: ", stop - start)
             handled = True
         if index_question == "2":
             user_path = input("Enter corpus path: ")
             corpus_path = Path(user_path)
             test_path = corpus_path / "postings.bin"   # this checks to see if the current corpus path has already been indexed
-            #if os.path.exists(test_path) == True:
-                #print("NICE SOMETHING WORKED")
-                #print(corpus_path)
-                #print("here now")
             handled = True
     d = DirectoryCorpus.load_json_directory(corpus_path, ".json")
-    #print(len(d.documents()))
     dpi = DiskPositionalIndex(corpus_path)
-    #print(type(corpus_path))
     print("1. Boolean retrieval.")
     print("2. Ranked retrieval.")
     retrieval_question = input("")
 
     # Begin retrieval
-    #query = input("Enter a query")
     query = ""
     bqparser = booleanqueryparser.BooleanQueryParser()
     if retrieval_question == "1":
@@ -229,7 +182,6 @@ if __name__ == "__main__":
                 print(stemmer.stem(token))
                 continue
             if query.startswith(':index'):
-                #token_processor = protokenprocessor.ProTokenProcessor()
                 newpath = query.split()[1:]
                 print(newpath)
                 corpus_path = Path(newpath)
@@ -237,8 +189,6 @@ if __name__ == "__main__":
                 continue
             if query.startswith(':vocab'):
                 connection = sqlite3.connect("bytepositions.db")
-                #sixth_path = corpus_path / "postings.bin"
-                #f = open(sixth_path,"rb")
                 cursor = connection.cursor()
                 testss = dpi.vocabulary()
                 cursor.execute("SELECT terms FROM bytes")
@@ -274,7 +224,6 @@ if __name__ == "__main__":
             else:
                 print("no results")
     if retrieval_question == "2":
-        # okay need to do this now
         while query != ":q":
             query = input("Enter a query: ")
             if query == ":q":
@@ -283,10 +232,4 @@ if __name__ == "__main__":
             if query[0] == '"' or query[-1] == '"':
                 query = stem_this(query)
             fin_query = new_stem(query)
-            #print("Query after stemming:", query)
-            #tests= dpi.get_no_postings("fauna")
-            #for z in tests:
-            #    print(d.get_document(z.doc_id))
             scores = cosine_score(fin_query, dpi, d, corpus_path)
-            #for z in scores:
-            #    print(z)

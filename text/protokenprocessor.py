@@ -9,8 +9,6 @@ class ProTokenProcessor(TokenProcessor):
     def process_token(self, token : str) -> Iterable[str]:      # Now we will be returning a list of strings,
         final_return = []                                     # (explains why hewlettpackardcomputing, hewlett, packard, and computing have the same position #)
         stemmer = Porter2Stemmer()
-##  I need to split a string like "fires in yosemite" to "fires" "in" "yosemite"
-        #temp = re.sub(self.whitespace_re, "", token).lower()
         while token != "":                  # while the term is not empty
             if not token[0].isalnum():   # removes the first letter if its not alphanumeric
                 token = token[1:]
@@ -33,7 +31,6 @@ class ProTokenProcessor(TokenProcessor):
                 if len(tok) > 0:
                     stemd = stemmer.stem(tok)
                     final_return.append(stemd)
-        #ltoken = token.lower()
         stemd = stemmer.stem(stoken)
         final_return.append(stemd)
         return final_return
